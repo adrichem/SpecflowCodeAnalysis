@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "BindingAnalyzer": {
+      "commandName": "Project"
+    }
+  }
+}
