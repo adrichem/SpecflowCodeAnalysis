@@ -2,7 +2,6 @@
 {
     using Microsoft.Build.Locator;
     using Microsoft.CodeAnalysis;
-    using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using Microsoft.CodeAnalysis.MSBuild;
     using System;
@@ -11,9 +10,7 @@
     using System.Linq;
     using System.Threading.Tasks;
     using MoreLinq;
-    using Gherkin;
-    using Gherkin.Ast;
-    using System.Text.RegularExpressions;
+
     using Newtonsoft.Json;
     class Program
     {
@@ -58,7 +55,16 @@
                             compilation.GetTypeByMetadataName("TechTalk.SpecFlow.WhenAttribute"),
                             compilation.GetTypeByMetadataName("TechTalk.SpecFlow.ThenAttribute"),
                         },
-                         ReportAttr = (attr) => GivenWhenThens.Add(attr)
+                        ReportAttr = (syntax, symbol, attr) =>
+                        {
+                            GivenWhenThens.Add(new DiscoveredAttributeUsage
+                            {
+                                Keyword = attr.AttributeClass.Name,
+                                Text = attr.ConstructorArguments.First().Value.ToString(),
+                                Method = symbol,
+                                MethodSyntax = syntax
+                            });
+                        }
                     };
 
                     foreach(var Tree in compilation.SyntaxTrees)
@@ -80,12 +86,34 @@
                                     SearchOption.AllDirectories
                                 )
                             ); });
-                   var Result = new UnusedGivenWhenThenFinder { 
-                       DiscoveredAttributes = GivenWhenThens, 
-                       FeatureFiles = FeatureFiles 
-                   }.Analyze();
+                    var Counter = new GivenWhenThenCounter { 
+                        DiscoveredAttributes = GivenWhenThens, 
+                        FeatureFiles = FeatureFiles 
+                    }.Analyze();
 
-                    Console.WriteLine(JsonConvert.SerializeObject(Result.Result, Formatting.Indented));
+
+                    var Result = new
+                    {
+                        UnusedBindingMethods = Counter
+                            .BindingsUsage
+                            .GroupBy(x => x.Key.Method)
+                            .Where(grp => grp.Sum(x => x.Value) == 0)
+                            .Select(grp => grp.Key.ToString())
+                            .ToList(),
+
+                        UnusedAttributes = Counter
+                            .BindingsUsage
+                            .Where(x => x.Value == 0)
+                            .Select( x => new
+                            {
+                                File = x.Key.MethodSyntax.GetLocation().SourceTree.FilePath,
+                                Line = x.Key.MethodSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
+                                Keyword = x.Key.Keyword.Substring(0, x.Key.Keyword.LastIndexOf("Attribute")),
+                                StepText = x.Key.Text
+                            })
+                    };
+
+                    Console.WriteLine(JsonConvert.SerializeObject(Result, Formatting.Indented));
                 }
             }
         }
@@ -112,97 +140,5 @@
                 Console.WriteLine("Input not accepted, try again.");
             }
         }
-        private class DiscoveredAttributeUsage
-        {
-            /// <summary>
-            /// The method symbol on which the attribute was found
-            /// </summary>
-            public IMethodSymbol Method { get; set; }
-
-            /// <summary>
-            /// The method syntax on which the attribute was found
-            /// </summary>
-            public MethodDeclarationSyntax MethodSyntax { get; set; }
-
-            /// <summary>
-            /// The Gherkin keyword of this attribute (Given/When/Then)
-            /// </summary>
-            public string Keyword { get; set; }
-
-            /// <summary>
-            /// The string provided to the constructor of the attribute
-            /// </summary>
-            public string Text { get; set; }
-        }
-        private class AttributeUsageFinder : CSharpSyntaxWalker
-        {
-            public SemanticModel SemanticModel { get; set; }
-            public IEnumerable<INamedTypeSymbol> Attributes { get; set; }
-            public Action<DiscoveredAttributeUsage> ReportAttr { get; set; }
-            public override void VisitMethodDeclaration(MethodDeclarationSyntax MethodSyntax)
-            {
-                IMethodSymbol MethodSymbol = SemanticModel.GetDeclaredSymbol(MethodSyntax);
-
-                MethodSymbol
-                    .GetAttributes()
-                    .Where(a => Attributes.Any(x => SymbolEqualityComparer.Default.Equals(x, a.AttributeClass)))
-                    .ForEach(attr => ReportAttr(new DiscoveredAttributeUsage
-                    {
-                         Keyword = attr.AttributeClass.Name,
-                         Text = attr.ConstructorArguments.First().Value.ToString(),
-                         Method = MethodSymbol,
-                         MethodSyntax = MethodSyntax
-                    }))
-                ;
-                base.VisitMethodDeclaration(MethodSyntax);
-            }
-        }
-        private class UnusedGivenWhenThenFinder
-        {
-            public IEnumerable<DiscoveredAttributeUsage> DiscoveredAttributes { get; set; }
-            public IEnumerable<string> FeatureFiles{ get; set; }
-            public object Result { get; private set; }
-            public UnusedGivenWhenThenFinder Analyze()
-            {
-                IDictionary<DiscoveredAttributeUsage, int> BindingsUsage = DiscoveredAttributes.ToDictionary(x => x, x => 0);
-                FeatureFiles.ForEach(f =>
-                {
-                    GherkinDocument gherkinDocument = new Parser().Parse(f);
-                    gherkinDocument.Feature.Children.OfType<StepsContainer>().ForEach(c => {
-                            string StepKeyword = string.Empty;
-                            c.Steps.ForEach(step => {
-  
-                                if(step.Keyword.Trim().ToLower() != "and") {
-                                    StepKeyword  = step.Keyword.Trim() + "Attribute";
-                                }
-                                string StepText = step.Text.Trim();
-                               
-                                DiscoveredAttributes
-                                    .Where(attr => attr.Keyword == StepKeyword)
-                                    .Where(attr => Regex.IsMatch(StepText, attr.Text))
-                                    .ForEach(attr => { BindingsUsage[attr] = BindingsUsage[attr] + 1;})
-                               ;
-                            });
-                        }
-                    );
-                });
-                var UsagePerMethod = BindingsUsage
-                    .GroupBy(x => x.Key.Method)
-                    .Select(grp => new { Method = grp.Key, Usage = grp.Sum(x => x.Value), Items = grp })
-                ;
-
-
-                var UnusedBindings = UsagePerMethod.Where(x => x.Usage == 0);
-
-                Result = new
-                {
-                    UnusedBindingMethods = UnusedBindings.Select(x => x.Method.ToString()),
-                    UnusedAttributes = BindingsUsage.Where(x => x.Value == 0).Select( x => $"{x.Key.Keyword} {x.Key.Text}")
-                };
-                return this;
-
-            }
-        }
-
     }
 }
