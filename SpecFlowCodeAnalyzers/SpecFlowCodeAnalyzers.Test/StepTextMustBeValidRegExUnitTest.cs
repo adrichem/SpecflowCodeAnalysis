@@ -57,10 +57,11 @@
         {
             public string RegexPattern { get; set; }
             public string ExpectedError { get; set; }
+            public FileLinePositionSpan ExpectedSpan { get; set; }
         }
 
         [TestMethod]
-        public async Task ValidRegexesMayNotCauseDiagnostics()
+        public async Task ValidRegexesMayNotCauseDiagnostic()
         {
             var ValidRegexes = new List<string>
             {
@@ -80,40 +81,40 @@
         }
         
         [TestMethod]
-        public async Task InvalidRegExes()
+        public async Task InvalidRegExesMustCauseDiagnostic()
         {
             var InvalidRegExes = new List<RegexTestSituation> {
                 new RegexTestSituation {
                     RegexPattern = "\\",
-                    ExpectedError = "ATTR => Invalid pattern '\\' at offset 1. Illegal \\\\ at end of pattern."
+                    ExpectedError = "Invalid pattern '\\' at offset 1. Illegal \\\\ at end of pattern.",
                 },
                 new RegexTestSituation {
                     RegexPattern = "[",
-                    ExpectedError = "ATTR => Invalid pattern '[' at offset 1. Unterminated [] set."
+                    ExpectedError = "Invalid pattern '[' at offset 1. Unterminated [] set."
                 },
                 new RegexTestSituation {
                     RegexPattern = "*",
-                    ExpectedError = "ATTR => Invalid pattern '*' at offset 1. Quantifier {x,y} following nothing."
+                    ExpectedError = "Invalid pattern '*' at offset 1. Quantifier {x,y} following nothing."
                 },
                 new RegexTestSituation
                 {
                     RegexPattern = "?",
-                    ExpectedError = "ATTR => Invalid pattern '?' at offset 1. Quantifier {x,y} following nothing."
+                    ExpectedError = "Invalid pattern '?' at offset 1. Quantifier {x,y} following nothing."
                 },
                 new RegexTestSituation
                 {
                     RegexPattern = "+",
-                    ExpectedError = "ATTR => Invalid pattern '+' at offset 1. Quantifier {x,y} following nothing."
+                    ExpectedError = "Invalid pattern '+' at offset 1. Quantifier {x,y} following nothing."
                 },
                 new RegexTestSituation
                 {
                     RegexPattern = "(",
-                    ExpectedError = "ATTR => Invalid pattern '(' at offset 1. Not enough )'s."
+                    ExpectedError = "Invalid pattern '(' at offset 1. Not enough )'s."
                 },
                 new RegexTestSituation
                 {
                     RegexPattern = ")",
-                    ExpectedError = "ATTR => Invalid pattern ')' at offset 1. Too many )'s."
+                    ExpectedError = "Invalid pattern ')' at offset 1. Too many )'s."
                 },
             };
 
@@ -127,11 +128,11 @@
                     {
                         TestCode = tmp,
                     };
-
+                    int ColumnStart = 27 + (Attribute == "Given" ? 1 : 0);
                     t.ExpectedDiagnostics.Add(new DiagnosticResult(StepTextMustBeValidRegEx.DiagnosticId, DiagnosticSeverity.Error)
-                      .WithSpan(7, 21, 8, 47)
-                      .WithArguments(Situation.ExpectedError.Replace("ATTR", $"{Attribute}Attribute")))
-                    ;
+                        .WithLocation(7, ColumnStart)
+                        .WithArguments(Situation.ExpectedError)
+                    );
                     await t.RunAsync(CancellationToken.None);
                 }
                  
