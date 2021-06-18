@@ -10,9 +10,9 @@
     using Microsoft.CodeAnalysis;
     using System.Threading;
 
-    public class Test : CSharpAnalyzerTest<StepTextMustBeValidRegEx, MSTestVerifier>
+    public class TestWithSpecFlowAssemblies : CSharpAnalyzerTest<StepTextMustBeValidRegEx, MSTestVerifier>
     {
-        public Test()
+        public TestWithSpecFlowAssemblies()
         {
             SolutionTransforms.Add((solution, projectId) =>
             {
@@ -26,6 +26,7 @@
                 var compilationOptions = solution.GetProject(projectId).CompilationOptions;
                 compilationOptions = compilationOptions.WithSpecificDiagnosticOptions(
                     compilationOptions.SpecificDiagnosticOptions.SetItems(CSharpVerifierHelper.NullableWarnings));
+              
                 solution = solution
                     .WithProjectCompilationOptions(projectId, compilationOptions)
                     .WithProjectMetadataReferences(projectId,tmp.MetadataReferences)
@@ -63,23 +64,17 @@
         {
             var ValidRegexes = new List<string>
             {
-                "]",
-                "{",
-                "}",
-                "{}",
-                ".*",
-                "(.*)"
+                "]", "{","}","{}",".*","(.*)","there must be [1-9][0-9]* items?"
             };
             foreach (var RegexPattern in ValidRegexes)
             {
                 foreach (var Attribute in new List<string> { "Given", "When", "Then" })
                 {
-                    string tmp = CodeTemplate.Replace("[ATTR]", $"[{Attribute}(@\"{RegexPattern}\")]");
-                    var t = new Test()
+                    await new TestWithSpecFlowAssemblies()
                     {
-                        TestCode = tmp,
-                    };
-                    await t.RunAsync(CancellationToken.None);
+                        TestCode = CodeTemplate.Replace("[ATTR]", $"[{Attribute}(@\"{RegexPattern}\")]"),
+                    }
+                    .RunAsync(CancellationToken.None);
                 }
             }
         }
@@ -128,7 +123,7 @@
                 foreach (var Attribute in new List<string> { "Given", "When", "Then" })
                 {
                     string tmp = CodeTemplate.Replace("[ATTR]", $"[{Attribute}(@\"{Situation.RegexPattern}\")]");
-                    var t = new Test()
+                    var t = new TestWithSpecFlowAssemblies()
                     {
                         TestCode = tmp,
                     };
