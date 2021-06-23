@@ -44,6 +44,7 @@
                 Context.Compilation.GetTypeByMetadataName("TechTalk.SpecFlow.GivenAttribute"),
                 Context.Compilation.GetTypeByMetadataName("TechTalk.SpecFlow.WhenAttribute"),
                 Context.Compilation.GetTypeByMetadataName("TechTalk.SpecFlow.ThenAttribute"),
+                Context.Compilation.GetTypeByMetadataName("TechTalk.SpecFlow.StepDefinitionAttribute"),
             };
             
             foreach(var Attribute in MethodSymbol.GetAttributes()

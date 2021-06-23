@@ -37,10 +37,17 @@
         }
     }
 
-
     [TestClass]
     public class StepTextMustBeValidRegExUnitTest
     {
+        private readonly IEnumerable<string> StepDefinitionAttributes = new List<string> 
+        { 
+            "Given", 
+            "When", 
+            "Then",
+            "StepDefinition"
+        };
+
         private readonly string CodeTemplate = @"
             using TechTalk.SpecFlow;
     
@@ -57,7 +64,6 @@
         {
             public string RegexPattern { get; set; }
             public string ExpectedError { get; set; }
-            public FileLinePositionSpan ExpectedSpan { get; set; }
         }
 
         [TestMethod]
@@ -69,7 +75,7 @@
             };
             foreach (var RegexPattern in ValidRegexes)
             {
-                foreach (var Attribute in new List<string> { "Given", "When", "Then" })
+                foreach (var Attribute in StepDefinitionAttributes)
                 {
                     await new TestWithSpecFlowAssemblies()
                     {
@@ -121,14 +127,27 @@
 
             foreach (var Situation in InvalidRegExes)
             {
-                foreach (var Attribute in new List<string> { "Given", "When", "Then" })
+                foreach (var Attribute in StepDefinitionAttributes)
                 {
                     string tmp = CodeTemplate.Replace("[ATTR]", $"[{Attribute}(@\"{Situation.RegexPattern}\")]");
                     var t = new TestWithSpecFlowAssemblies()
                     {
                         TestCode = tmp,
                     };
-                    int ColumnStart = 27 + (Attribute == "Given" ? 1 : 0);
+                    int ColumnStart = 27;
+                    switch (Attribute)
+                    {
+                        case "Given": 
+                            ColumnStart += 1; 
+                            break;
+                        case "StepDefinition":                            ;
+                            ColumnStart += 10;
+                            break;
+                        default:
+                            break;
+
+                    }
+                    
                     t.ExpectedDiagnostics.Add(new DiagnosticResult(StepTextMustBeValidRegEx.DiagnosticId, DiagnosticSeverity.Error)
                         .WithLocation(7, ColumnStart)
                         .WithArguments(Situation.ExpectedError)
