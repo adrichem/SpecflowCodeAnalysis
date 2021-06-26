@@ -5,37 +5,10 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Microsoft.CodeAnalysis.CSharp.Testing;
-    using Microsoft.CodeAnalysis.Testing.Verifiers;
     using Microsoft.CodeAnalysis;
     using System.Threading;
-
-    public class TestWithSpecFlowAssemblies : CSharpAnalyzerTest<StepTextMustBeValidRegEx, MSTestVerifier>
-    {
-        public TestWithSpecFlowAssemblies()
-        {
-            SolutionTransforms.Add((solution, projectId) =>
-            {
-                var specFlowAssembly = MetadataReference.CreateFromFile(typeof(TechTalk.SpecFlow.AfterAttribute).Assembly.Location);
-
-                var tmp = solution
-                    .GetProject(projectId)
-                    .AddMetadataReference(specFlowAssembly)
-                 ;
-
-                var compilationOptions = solution.GetProject(projectId).CompilationOptions;
-                compilationOptions = compilationOptions.WithSpecificDiagnosticOptions(
-                    compilationOptions.SpecificDiagnosticOptions.SetItems(CSharpVerifierHelper.NullableWarnings));
-              
-                solution = solution
-                    .WithProjectCompilationOptions(projectId, compilationOptions)
-                    .WithProjectMetadataReferences(projectId,tmp.MetadataReferences)
-                ;
-                
-                return solution;
-            });
-        }
-    }
+    using SpecFlowCodeAnalyzers.Test.Common;
+    using System.Linq;
 
     [TestClass]
     public class StepTextMustBeValidRegExUnitTest
@@ -53,17 +26,54 @@
     
             namespace ConsoleApplication1
             {
-                class Foo
-                {   [ATTR]
+                [Binding]
+                public class Foo
+                {   
+                    [ATTR]
                     public void Test(int a) {}
                 }
             }"
         ;
 
-        class RegexTestSituation
+        /// <summary>
+        /// Represents a test sitation for an invalid regex used in a SpecFlow attribute.
+        /// </summary>
+        class InvalidRegexTestSituation
         {
+            /// <summary>
+            /// The attribute (Given/When/Then) to test with.
+            /// </summary>
+            public string Attribute { get; set; }
+            
+            /// <summary>
+            /// The regex pattern to test with.
+            /// </summary>
             public string RegexPattern { get; set; }
+            
+            /// <summary>
+            /// The expected message from analyzer.
+            /// </summary>
             public string ExpectedError { get; set; }
+
+            /// <summary>
+            /// The expected start line of the analyzers span.
+            /// </summary>
+            public int LineStart { get; set; }
+
+            /// <summary>
+            /// The expected end line of the analyzers span.
+            /// </summary>
+            public int LineEnd { get; set; }
+
+            /// <summary>
+            /// The expected start column of the analyzers span.
+            /// </summary>
+            public int ColumnStart { get; set; }
+
+            /// <summary>
+            /// The expected end column of the analyzers span.
+            /// </summary>
+            public int ColumnEnd { get; set; }
         }
 
         [TestMethod]
@@ -73,90 +83,125 @@
             {
                 "]", "{","}","{}",".*","(.*)","there must be [1-9][0-9]* items?"
             };
-            foreach (var RegexPattern in ValidRegexes)
+
+            var Tests = ValidRegexes
+                .SelectMany(vr => StepDefinitionAttributes, (RegexPattern, Attribute) => new { RegexPattern, Attribute })
+            ;
+            foreach(var x in Tests)
             {
-                foreach (var Attribute in StepDefinitionAttributes)
-                {
-                    await new TestWithSpecFlowAssemblies()
-                    {
-                        TestCode = CodeTemplate.Replace("[ATTR]", $"[{Attribute}(@\"{RegexPattern}\")]"),
-                    }
-                    .RunAsync(CancellationToken.None);
-                }
+                await new TestWithSpecFlowAssemblies<StepTextMustBeValidRegEx>()
+                        .WithCode(CodeTemplate.Replace("[ATTR]", $"[{x.Attribute}(@\"{x.RegexPattern}\")]"))
+                        .RunAsync(CancellationToken.None);
             }
         }
-        
+
         [TestMethod]
         public async Task InvalidRegExesMustCauseDiagnostic()
         {
-            var InvalidRegExes = new List<RegexTestSituation> {
-                new RegexTestSituation {
+            IEnumerable<InvalidRegexTestSituation> InvalidRegExes = new List<InvalidRegexTestSituation> {
+                new InvalidRegexTestSituation {
                     RegexPattern = "\\",
                     ExpectedError = "Invalid pattern '\\' at offset 1. Illegal \\\\ at end of pattern.",
                 },
-                new RegexTestSituation {
+                new InvalidRegexTestSituation {
                     RegexPattern = "[",
                     ExpectedError = "Invalid pattern '[' at offset 1. Unterminated [] set."
                 },
-                new RegexTestSituation {
+                new InvalidRegexTestSituation {
                     RegexPattern = "*",
                     ExpectedError = "Invalid pattern '*' at offset 1. Quantifier {x,y} following nothing."
                 },
-                new RegexTestSituation
+                new InvalidRegexTestSituation
                 {
                     RegexPattern = "?",
                     ExpectedError = "Invalid pattern '?' at offset 1. Quantifier {x,y} following nothing."
                 },
-                new RegexTestSituation
+                new InvalidRegexTestSituation
                 {
                     RegexPattern = "+",
                     ExpectedError = "Invalid pattern '+' at offset 1. Quantifier {x,y} following nothing."
                 },
-                new RegexTestSituation
+                new InvalidRegexTestSituation
                 {
                     RegexPattern = "(",
                     ExpectedError = "Invalid pattern '(' at offset 1. Not enough )'s."
                 },
-                new RegexTestSituation
+                new InvalidRegexTestSituation
                 {
                     RegexPattern = ")",
                     ExpectedError = "Invalid pattern ')' at offset 1. Too many )'s."
                 },
             };
-
-
-            foreach (var Situation in InvalidRegExes)
-            {
-                foreach (var Attribute in StepDefinitionAttributes)
-                {
-                    string tmp = CodeTemplate.Replace("[ATTR]", $"[{Attribute}(@\"{Situation.RegexPattern}\")]");
-                    var t = new TestWithSpecFlowAssemblies()
-                    {
-                        TestCode = tmp,
-                    };
-                    int ColumnStart = 27;
-                    switch (Attribute)
-                    {
-                        case "Given": 
-                            ColumnStart += 1; 
-                            break;
-                        case "StepDefinition":                            ;
-                            ColumnStart += 10;
-                            break;
-                        default:
-                            break;
-
-                    }
-                    
-                    t.ExpectedDiagnostics.Add(new DiagnosticResult(StepTextMustBeValidRegEx.DiagnosticId, DiagnosticSeverity.Error)
-                        .WithLocation(7, ColumnStart)
-                        .WithArguments(Situation.ExpectedError)
-                    );
-                    await t.RunAsync(CancellationToken.None);
-                }
-                 
-            }
             
+            var Situations = InvalidRegExes
+                .SelectMany(Situation => StepDefinitionAttributes, (S,A) => CombineSituationWithAttribute(S, A) )
+                .Select(Situation => CalculateLineStartAndEnd(Situation))
+                .Select(Situation => CalculateSpanStart(Situation))
+                .Select(Situation => CalculateSpanEnd(Situation))
+                .Select(Situation => CreateTestTask(Situation))
+                .ToArray()
+            ;
+
+            foreach(var S in Situations)
+            {
+                await S;
+            }
+
+            InvalidRegexTestSituation CalculateLineStartAndEnd(InvalidRegexTestSituation Situation)
+            {
+                Situation.LineStart = 9;
+                Situation.LineEnd = 9;
+                return Situation;
+            }
+
+            InvalidRegexTestSituation CalculateSpanStart(InvalidRegexTestSituation Situation)
+            {
+                switch (Situation.Attribute)
+                {
+                    case "Given":
+                        Situation.ColumnStart = 28;
+                        break;
+                    case "StepDefinition":
+                        Situation.ColumnStart = 37;
+                        break;
+                    default:
+                        Situation.ColumnStart = 27;
+                        break;
+
+                }
+                return Situation;
+            }
+
+            InvalidRegexTestSituation CalculateSpanEnd(InvalidRegexTestSituation Situation)
+            {
+                //Dont forget to include
+                // The @ char
+                // First "
+                // Last "
+                Situation.ColumnEnd = Situation.ColumnStart + Situation.RegexPattern.Length + 1 + 1 + 1;
+                return Situation;
+            }
+
+            InvalidRegexTestSituation CombineSituationWithAttribute(InvalidRegexTestSituation Situation, string Attribute)
+            {
+                Situation.Attribute = Attribute;
+                return Situation;
+            }
+
+            Task CreateTestTask(InvalidRegexTestSituation Situation)
+            {
+                return new TestWithSpecFlowAssemblies<StepTextMustBeValidRegEx>()
+                    .WithCode(CodeTemplate.Replace("[ATTR]", $"[{Situation.Attribute}(@\"{Situation.RegexPattern}\")]"))
+                    .WithExpectedDiagnostic(new DiagnosticResult(StepTextMustBeValidRegEx.DiagnosticId, DiagnosticSeverity.Error)
+                        .WithSpan(Situation.LineStart, Situation.ColumnStart, Situation.LineEnd, Situation.ColumnEnd)
+                        .WithArguments(Situation.ExpectedError)
+                    )
+                    .RunAsync()
+                ;
+            }
         }
+
+        
+       
     }
 }

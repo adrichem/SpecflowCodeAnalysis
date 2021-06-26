@@ -2,26 +2,24 @@
 {
     using Adrichem.Test.SpecFlowCodeAnalyzers.Common;
     using Microsoft.CodeAnalysis;
-    using Microsoft.CodeAnalysis.CSharp.Syntax;
     using Microsoft.CodeAnalysis.Diagnostics;
-    using System;
     using System.Collections.Immutable;
     using System.Linq;
 
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public class StepTextMustBeValidRegEx : DiagnosticAnalyzer
+    public class StepDefinitionMustBePublic : DiagnosticAnalyzer
     {
-        public const string DiagnosticId = nameof(StepTextMustBeValidRegEx);
-        private static readonly string Title = "Invalid Regex";
+        public const string DiagnosticId = nameof(StepDefinitionMustBePublic);
+        private static readonly string Title = "Must be public";
         private static readonly string MessageFormat = "{0}";
-        private static readonly string Description = "Text provided to Given, When and Then attributes must be valid Regular expression.";
+        private static readonly string Description = "A step definition method must be public.";
         private const string Category = "SpecFlow";
 
         private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId
             , Title
             , MessageFormat
             , Helpers.DiagnosticCategory
-            , DiagnosticSeverity.Error
+            , DiagnosticSeverity.Warning
             , isEnabledByDefault: true
             , description: Description
         );
@@ -38,32 +36,24 @@
         private static void AnalyzeMethod(SymbolAnalysisContext Context)
         {
             IMethodSymbol MethodSymbol = Context.Symbol as IMethodSymbol;
-
-            var AttributeTypesToCheck = Helpers.GetStepDefinitionTypeSymbols(Context.Compilation);
-
-            foreach (var Attribute in MethodSymbol.GetAttributes()
-                .Where(a => AttributeTypesToCheck.Any(x => SymbolEqualityComparer.Default.Equals(a.AttributeClass, x)))
-                .Where(a => a.ConstructorArguments.Any()))
+            if (MethodSymbol.DeclaredAccessibility != Accessibility.Public)
             {
-                string RegExPattern = Attribute.ConstructorArguments.First().Value.ToString();
-                try
+                var AttributeTypesToCheck = Helpers.GetStepDefinitionTypeSymbols(Context.Compilation);
+                var AttributesToCheck = MethodSymbol
+                    .GetAttributes()
+                    .Where(a => AttributeTypesToCheck.Any(x => SymbolEqualityComparer.Default.Equals(a.AttributeClass, x)))
+                ;
+
+                foreach (var Attribute in AttributesToCheck)
                 {
-                    new System.Text.RegularExpressions.Regex(RegExPattern);
-                }
-                catch (Exception e)
-                {
-                    var LocationofString = Attribute
+                    var LocationofAttribute = Attribute
                         .ApplicationSyntaxReference
                         .GetSyntax()
-                        .DescendantNodes()
-                        .OfType<AttributeArgumentSyntax>()
-                        .FirstOrDefault()
-                        ?.GetLocation()
+                        .GetLocation()
                     ;
-                    Context.ReportDiagnostic(Diagnostic.Create(Rule, LocationofString, e.Message));
+                    Context.ReportDiagnostic(Diagnostic.Create(Rule, LocationofAttribute, string.Empty));
                 }
             }
-
         }
     }
 }
