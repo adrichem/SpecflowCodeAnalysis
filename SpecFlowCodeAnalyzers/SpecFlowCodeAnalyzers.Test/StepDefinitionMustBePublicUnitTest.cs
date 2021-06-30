@@ -40,7 +40,8 @@
                     public class MyTestCode
                     {   
                         [Given, When, Then(""here is my regex""),StepDefinition]
-                        [ACCESS] void A() {}
+                        [ACCESS] 
+                        void Abcdefg() {}
 
                         public void NotAStepDefinition() {}
 
@@ -51,10 +52,7 @@
             var Tasks = AccessModifiers
                 .Select(AccessModifier => new TestWithSpecFlowAssemblies<StepDefinitionMustBePublic>()
                         .WithCode(CodeTemplate.Replace("[ACCESS]", AccessModifier))
-                        .WithExpectedDiagnostic(ExpectedDiagnostic(9, 26, 9, 31))
-                        .WithExpectedDiagnostic(ExpectedDiagnostic(9, 33, 9, 37))
-                        .WithExpectedDiagnostic(ExpectedDiagnostic(9, 39, 9, 63))
-                        .WithExpectedDiagnostic(ExpectedDiagnostic(9, 64, 9, 78))
+                        .WithExpectedDiagnostic(ExpectedDiagnostic(11, 30, 11, 37))
                         .RunAsync())
                 .ToArray()
             ;
@@ -77,7 +75,12 @@
                         [When]
                         [Then(""here is my regex"")]
                            [StepDefinition("""")]
-                        [ACCESS] void A() {}
+                        [ACCESS] 
+                        void A() {}
+
+                        [Given(""blah blah"")]
+                        [ACCESS] 
+                        void ABC() {}
 
                         public void NotAStepDefinition() {}
 
@@ -89,53 +92,11 @@
             var Tasks = AccessModifiers
                 .Select(AccessModifier => new TestWithSpecFlowAssemblies<StepDefinitionMustBePublic>()
                     .WithCode(CodeTemplate.Replace("[ACCESS]", AccessModifier))
-                    .WithExpectedDiagnostic(ExpectedDiagnostic(9, 26, 9, 31))
-                    .WithExpectedDiagnostic(ExpectedDiagnostic(10, 26, 10, 30))
-                    .WithExpectedDiagnostic(ExpectedDiagnostic(11, 26, 11, 50))
-                    .WithExpectedDiagnostic(ExpectedDiagnostic(12, 29, 12, 47))
+                    .WithExpectedDiagnostic(ExpectedDiagnostic(14, 30, 14, 31))
+                    .WithExpectedDiagnostic(ExpectedDiagnostic(18, 30, 18, 33))
                     .RunAsync())
                 .ToArray()
            ;
-            Task.WaitAll(Tasks);
-        }
-
-        [TestMethod]
-        public void NonPublicStepDefinitionsMustCauseDiagnostic()
-        {
-            string CodeTemplate = @"
-                using TechTalk.SpecFlow;
-    
-                namespace ConsoleApplication1
-                {
-                    [Binding]    
-                    public class MyTestCode
-                    {   
-                        [Given]
-                        [ACCESS] void A() {}
-
-                        [When]
-                        [ACCESS] void B() {}
-
-                        [Then]
-                        [ACCESS] void C() {}
-
-                        [    StepDefinition]
-                        [ACCESS] void D() {}
-
-                        public void NotAStepDefinition() {}
-
-                        private void NotAStepDefinitionPrivate() {}
-                    }
-                }"
-            ;
-            var Tasks = AccessModifiers.Select(AccessModifier => new TestWithSpecFlowAssemblies<StepDefinitionMustBePublic>()
-                    .WithCode(CodeTemplate.Replace("[ACCESS]", AccessModifier))
-                    .WithExpectedDiagnostic(ExpectedDiagnostic(9, 26, 9, 31))
-                    .WithExpectedDiagnostic(ExpectedDiagnostic(12, 26, 12, 30))
-                    .WithExpectedDiagnostic(ExpectedDiagnostic(15, 26, 15, 30))
-                    .WithExpectedDiagnostic(ExpectedDiagnostic(18, 30, 18, 44)).RunAsync())
-                    .ToArray()
-            ;
             Task.WaitAll(Tasks);
         }
 

@@ -39,19 +39,18 @@
             if (MethodSymbol.DeclaredAccessibility != Accessibility.Public)
             {
                 var AttributeTypesToCheck = Helpers.GetStepDefinitionTypeSymbols(Context.Compilation);
-                var AttributesToCheck = MethodSymbol
+                bool MethodHasSpecFlowAtributes = MethodSymbol
                     .GetAttributes()
                     .Where(a => AttributeTypesToCheck.Any(x => SymbolEqualityComparer.Default.Equals(a.AttributeClass, x)))
+                    .Any()
                 ;
 
-                foreach (var Attribute in AttributesToCheck)
+                if (MethodHasSpecFlowAtributes)
                 {
-                    var LocationofAttribute = Attribute
-                        .ApplicationSyntaxReference
-                        .GetSyntax()
-                        .GetLocation()
-                    ;
-                    Context.ReportDiagnostic(Diagnostic.Create(Rule, LocationofAttribute, string.Empty));
+                    Context.ReportDiagnostic(Diagnostic.Create(Rule
+                        , MethodSymbol.Locations.First()
+                        , $"{MethodSymbol.ReceiverType}.{MethodSymbol.Name}")
+                    );
                 }
             }
         }

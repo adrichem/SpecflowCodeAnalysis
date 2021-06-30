@@ -35,47 +35,6 @@
             }"
         ;
 
-        /// <summary>
-        /// Represents a test sitation for an invalid regex used in a SpecFlow attribute.
-        /// </summary>
-        class InvalidRegexTestSituation
-        {
-            /// <summary>
-            /// The attribute (Given/When/Then) to test with.
-            /// </summary>
-            public string Attribute { get; set; }
-            
-            /// <summary>
-            /// The regex pattern to test with.
-            /// </summary>
-            public string RegexPattern { get; set; }
-            
-            /// <summary>
-            /// The expected message from analyzer.
-            /// </summary>
-            public string ExpectedError { get; set; }
-
-            /// <summary>
-            /// The expected start line of the analyzers span.
-            /// </summary>
-            public int LineStart { get; set; }
-
-            /// <summary>
-            /// The expected end line of the analyzers span.
-            /// </summary>
-            public int LineEnd { get; set; }
-
-            /// <summary>
-            /// The expected start column of the analyzers span.
-            /// </summary>
-            public int ColumnStart { get; set; }
-
-            /// <summary>
-            /// The expected end column of the analyzers span.
-            /// </summary>
-            public int ColumnEnd { get; set; }
-        }
-
         [TestMethod]
         public async Task ValidRegexesMayNotCauseDiagnostic()
         {
@@ -133,6 +92,9 @@
                 },
             };
             
+            //Combine each invalid regex with each type of stepdefinition to create a bunch of situations to test
+            //Calculate the expected span for each sitiation
+            //and create a Task we can await
             var Situations = InvalidRegExes
                 .SelectMany(Situation => StepDefinitionAttributes, (S,A) => CombineSituationWithAttribute(S, A) )
                 .Select(Situation => CalculateLineStartAndEnd(Situation))
@@ -201,7 +163,46 @@
             }
         }
 
-        
-       
+        /// <summary>
+        /// Represents a test sitation for an invalid regex used in a SpecFlow attribute.
+        /// </summary>
+        class InvalidRegexTestSituation
+        {
+            /// <summary>
+            /// The attribute (Given/When/Then) to test with.
+            /// </summary>
+            public string Attribute { get; set; }
+
+            /// <summary>
+            /// The regex pattern to test with.
+            /// </summary>
+            public string RegexPattern { get; set; }
+
+            /// <summary>
+            /// The expected message from analyzer.
+            /// </summary>
+            public string ExpectedError { get; set; }
+
+            /// <summary>
+            /// The expected start line of the analyzers span.
+            /// </summary>
+            public int LineStart { get; set; }
+
+            /// <summary>
+            /// The expected end line of the analyzers span.
+            /// </summary>
+            public int LineEnd { get; set; }
+
+            /// <summary>
+            /// The expected start column of the analyzers span.
+            /// </summary>
+            public int ColumnStart { get; set; }
+
+            /// <summary>
+            /// The expected end column of the analyzers span.
+            /// </summary>
+            public int ColumnEnd { get; set; }
+        }
+
     }
 }

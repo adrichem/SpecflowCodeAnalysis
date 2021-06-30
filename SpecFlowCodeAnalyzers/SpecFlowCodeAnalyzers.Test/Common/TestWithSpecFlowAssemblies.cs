@@ -9,7 +9,7 @@
     public class TestWithSpecFlowAssemblies<TAnalyzer> : CSharpAnalyzerTest<TAnalyzer, MSTestVerifier> where TAnalyzer : DiagnosticAnalyzer, new()
     {
         /// <summary>
-        /// A <seealso cref="CSharpAnalyzerTest"/> with references to the SpecFlow assembly
+        /// A <see cref="CSharpAnalyzerTest"/> with references to the SpecFlow assembly
         /// </summary>
         public TestWithSpecFlowAssemblies()
         {

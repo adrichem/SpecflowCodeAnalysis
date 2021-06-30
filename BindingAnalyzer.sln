@@ -5,13 +5,15 @@ VisualStudioVersion = 16.0.31402.337
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BindingAnalyzer", "BindingAnalyzer\BindingAnalyzer.csproj", "{4FDEC114-2A1B-46ED-9EC5-4278E8FECCE9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpecFlowCodeAnalyzers", "SpecFlowCodeAnalyzers\SpecFlowCodeAnalyzers\SpecFlowCodeAnalyzers.csproj", "{43695BAE-7770-4E92-A6D4-97C20C2F7852}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpecFlowCodeAnalyzers", "SpecFlowCodeAnalyzers\SpecFlowCodeAnalyzers\SpecFlowCodeAnalyzers.csproj", "{43695BAE-7770-4E92-A6D4-97C20C2F7852}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpecFlowCodeAnalyzers.Package", "SpecFlowCodeAnalyzers\SpecFlowCodeAnalyzers.Package\SpecFlowCodeAnalyzers.Package.csproj", "{14784938-45D6-4608-AD7F-FDF9390C2613}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpecFlowCodeAnalyzers.Package", "SpecFlowCodeAnalyzers\SpecFlowCodeAnalyzers.Package\SpecFlowCodeAnalyzers.Package.csproj", "{14784938-45D6-4608-AD7F-FDF9390C2613}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpecFlowCodeAnalyzers.Test", "SpecFlowCodeAnalyzers\SpecFlowCodeAnalyzers.Test\SpecFlowCodeAnalyzers.Test.csproj", "{E45895CA-2218-4BA3-BF04-089376D75843}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpecFlowCodeAnalyzers.Test", "SpecFlowCodeAnalyzers\SpecFlowCodeAnalyzers.Test\SpecFlowCodeAnalyzers.Test.csproj", "{E45895CA-2218-4BA3-BF04-089376D75843}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpecFlowCodeAnalyzers.Vsix", "SpecFlowCodeAnalyzers\SpecFlowCodeAnalyzers.Vsix\SpecFlowCodeAnalyzers.Vsix.csproj", "{C4DFCA9D-467B-49B2-BD25-E0EE35628508}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpecFlowCodeAnalyzers.Vsix", "SpecFlowCodeAnalyzers\SpecFlowCodeAnalyzers.Vsix\SpecFlowCodeAnalyzers.Vsix.csproj", "{C4DFCA9D-467B-49B2-BD25-E0EE35628508}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpecFlowCodeAnalyzers.CodeFixes", "SpecFlowCodeAnalyzers.CodeFixes\SpecFlowCodeAnalyzers.CodeFixes.csproj", "{C7140964-8A74-4CF5-9746-F1AAE547E0E1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{C4DFCA9D-467B-49B2-BD25-E0EE35628508}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C4DFCA9D-467B-49B2-BD25-E0EE35628508}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C4DFCA9D-467B-49B2-BD25-E0EE35628508}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7140964-8A74-4CF5-9746-F1AAE547E0E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7140964-8A74-4CF5-9746-F1AAE547E0E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7140964-8A74-4CF5-9746-F1AAE547E0E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7140964-8A74-4CF5-9746-F1AAE547E0E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
