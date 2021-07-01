@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -8,28 +8,31 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>SpecFlowCodeAnalyzers</PackageId>
-    <PackageVersion>1.0.0.3</PackageVersion>
+    <PackageId>Adrichem.SpecFlow.Analyzers</PackageId>
+    <PackageVersion>1.0.6</PackageVersion>
     <Authors>Gerben van Adrichem</Authors>
-    <PackageLicenseUrl>http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE</PackageLicenseUrl>
-    <PackageProjectUrl>http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE</PackageProjectUrl>
-    <PackageIconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</PackageIconUrl>
-    <RepositoryUrl>http://REPOSITORY_URL_HERE_OR_DELETE_THIS_LINE</RepositoryUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/adrichem/SpecflowCodeAnalysis</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/adrichem/SpecflowCodeAnalysis</RepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Description>SpecFlowCodeAnalyzers</Description>
-    <PackageReleaseNotes>Summary of changes made in this release of the package.</PackageReleaseNotes>
-    <Copyright>Copyright</Copyright>
-    <PackageTags>SpecFlowCodeAnalyzers, analyzers</PackageTags>
+    <Description>Detects code smells in SpecFlow binding code.</Description>
+    <PackageReleaseNotes></PackageReleaseNotes>
+    <Copyright>Copyright Gerben van Adrichem</Copyright>
+    <PackageTags>specflow,code smell,smell,analyzer,codefix,roslyn</PackageTags>
     <DevelopmentDependency>true</DevelopmentDependency>
     <NoPackageAnalysis>true</NoPackageAnalysis>
 
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddAnalyzersToOutput</TargetsForTfmSpecificContentInPackage>
 
-    <AssemblyVersion>1.0.0.1</AssemblyVersion>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
 
-    <FileVersion>1.0.0.1</FileVersion>
+    <FileVersion>1.0.0.0</FileVersion>
 
-    <Version>1.0.3</Version>
+    <Version>1.0.6</Version>
+
+    <Product>Adrichem.SpecFlow.Analyzers</Product>
+
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>

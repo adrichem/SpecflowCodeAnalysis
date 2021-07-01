@@ -9,11 +9,10 @@
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class StepDefinitionMustBePublic : DiagnosticAnalyzer
     {
-        public const string DiagnosticId = nameof(StepDefinitionMustBePublic);
+        public const string DiagnosticId = Common.DiagnosticId.MustBePublicMethod;
         private static readonly string Title = "Must be public";
         private static readonly string MessageFormat = "{0}";
-        private static readonly string Description = "A step definition method must be public.";
-        private const string Category = "SpecFlow";
+        private static readonly string Description = "A step definition must be public.";
 
         private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId
             , Title
@@ -49,7 +48,7 @@
                 {
                     Context.ReportDiagnostic(Diagnostic.Create(Rule
                         , MethodSymbol.Locations.First()
-                        , $"Should be public: {MethodSymbol.Name}")
+                        , $"Must be public: {MethodSymbol.Name}")
                     );
                 }
             }
