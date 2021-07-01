@@ -11,12 +11,11 @@
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class StepTextMustBeValidRegEx : DiagnosticAnalyzer
     {
-        public const string DiagnosticId = Common.DiagnosticId.InvalidRegEx;
         private static readonly string Title = "Invalid Regex";
         private static readonly string MessageFormat = "{0}";
         private static readonly string Description = "Text provided to SpecFlow attributes must be valid Regular Expression.";
         
-        private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId
+        private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(SpecFlowCodeAnalyzersDiagnosticIds.InvalidRegEx
             , Title
             , MessageFormat
             , Helpers.DiagnosticCategory

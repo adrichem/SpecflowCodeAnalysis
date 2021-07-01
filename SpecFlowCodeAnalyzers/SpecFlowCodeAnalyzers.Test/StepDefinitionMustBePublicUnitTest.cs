@@ -11,6 +11,7 @@
     using System;
     using System.Linq;
     using SpecFlowCodeAnalyzers.CodeFixes;
+    using Adrichem.Test.SpecFlowCodeAnalyzers.Common;
 
     [TestClass]
     public class StepDefinitionMustBePublicUnitTest
@@ -25,7 +26,7 @@
         };
 
         private readonly Func<int,int,int,int, DiagnosticResult> ExpectedDiagnostic = (x1,y1,x2,y2) => 
-            new DiagnosticResult(StepDefinitionMustBePublic.DiagnosticId, DiagnosticSeverity.Warning)
+            new DiagnosticResult(SpecFlowCodeAnalyzersDiagnosticIds.MustBePublicMethod, DiagnosticSeverity.Warning)
                 .WithSpan(x1, y1, x2, y2)
         ;
 

@@ -1,6 +1,6 @@
 ﻿namespace SpecFlowCodeAnalyzers.CodeFixes
 {
-    using Adrichem.Test.SpecFlowCodeAnalyzers;
+    using Adrichem.Test.SpecFlowCodeAnalyzers.Common;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CodeActions;
     using Microsoft.CodeAnalysis.CodeFixes;
@@ -19,7 +19,7 @@
         private static readonly string Title = "Make public";
         public sealed override ImmutableArray<string> FixableDiagnosticIds
         {
-            get { return ImmutableArray.Create(StepDefinitionMustBePublic.DiagnosticId); }
+            get { return ImmutableArray.Create(SpecFlowCodeAnalyzersDiagnosticIds.MustBePublicMethod); }
         }
 
         public sealed override FixAllProvider GetFixAllProvider()

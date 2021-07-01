@@ -9,6 +9,7 @@
     using System.Threading;
     using SpecFlowCodeAnalyzers.Test.Common;
     using System.Linq;
+    using Adrichem.Test.SpecFlowCodeAnalyzers.Common;
 
     [TestClass]
     public class StepTextMustBeValidRegExUnitTest
@@ -93,7 +94,7 @@
             };
             
             //Combine each invalid regex with each type of stepdefinition to create a bunch of situations to test
-            //Calculate the expected span for each sitiation
+            //Calculate the expected span for each situation
             //and create a Task we can await
             var Situations = InvalidRegExes
                 .SelectMany(Situation => StepDefinitionAttributes, (S,A) => CombineSituationWithAttribute(S, A) )
@@ -154,7 +155,7 @@
             {
                 return new CSharpAnalyzerTestWithSpecFlowAssemblies<StepTextMustBeValidRegEx>()
                     .WithCode(CodeTemplate.Replace("[ATTR]", $"[{Situation.Attribute}(@\"{Situation.RegexPattern}\")]"))
-                    .WithExpectedDiagnostic(new DiagnosticResult(StepTextMustBeValidRegEx.DiagnosticId, DiagnosticSeverity.Error)
+                    .WithExpectedDiagnostic(new DiagnosticResult(SpecFlowCodeAnalyzersDiagnosticIds.InvalidRegEx, DiagnosticSeverity.Error)
                         .WithSpan(Situation.LineStart, Situation.ColumnStart, Situation.LineEnd, Situation.ColumnEnd)
                         .WithArguments(Situation.ExpectedError)
                     )

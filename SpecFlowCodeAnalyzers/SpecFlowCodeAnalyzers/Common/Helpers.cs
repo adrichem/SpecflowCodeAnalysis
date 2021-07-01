@@ -5,7 +5,6 @@
 
     internal class Helpers
     {
-
         public static string DiagnosticCategory { get; } = "SpecFlow";
         public static IEnumerable<INamedTypeSymbol> GetStepDefinitionTypeSymbols(Compilation C)
         {
