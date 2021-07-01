@@ -6,10 +6,6 @@
     using Microsoft.CodeAnalysis.CodeFixes;
     using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
-    using Microsoft.CodeAnalysis.Formatting;
-    using Microsoft.CodeAnalysis.Rename;
-    using Microsoft.CodeAnalysis.Text;
-    using System;
     using System.Collections.Generic;
     using System.Collections.Immutable;
     using System.Composition;
@@ -36,14 +32,14 @@
         {
             var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
 
-            // TODO: Replace the following code with your own analysis, generating a CodeAction for each fix to suggest
             var diagnostic = context.Diagnostics.First();
             var diagnosticSpan = diagnostic.Location.SourceSpan;
-
-            // Find the method declaration identified by the diagnostic.
-            var declaration = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<MethodDeclarationSyntax>().First();
-
-            // Register a code action that will invoke the fix.
+            var declaration = root.FindToken(diagnosticSpan.Start)
+                .Parent
+                .AncestorsAndSelf()
+                .OfType<MethodDeclarationSyntax>()
+                .First()
+             ;
             context.RegisterCodeFix(
                 CodeAction.Create(
                     title: Title,
@@ -59,7 +55,7 @@
                 || child.IsKind(SyntaxKind.InternalKeyword);
         }
 
-        private async Task<Document> RemoveAccessibilityModifiers(Document document
+        private async Task<Document> MakePublicAsync(Document document
             , MethodDeclarationSyntax methodDecl
             , CancellationToken cancellationToken)
         {
@@ -85,52 +81,6 @@
 
 
             return document.WithSyntaxRoot(newRoot);
-        }
-
-
-        /// <summary>
-        /// Inserts the 'public' keyword before the return type of the method
-        /// </summary>
-        /// <param name="document"></param>
-        /// <param name="methodDecl"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        private async Task<Document> InsertPublicKeyword(Document document
-            , MethodDeclarationSyntax methodDecl
-            , CancellationToken cancellationToken)
-        {
-            SyntaxTriviaList leadingTrivia = methodDecl
-                .ReturnType
-                .GetLeadingTrivia();
-            
-            SyntaxToken publicToken = SyntaxFactory.Token(leadingTrivia, SyntaxKind.PublicKeyword, SyntaxFactory.TriviaList(SyntaxFactory.ElasticMarker));
-
-            MethodDeclarationSyntax newMethodDeclaration = methodDecl
-                .WithModifiers(methodDecl.Modifiers.Insert(0,publicToken));
-            
-            SyntaxNode oldRoot = await document
-                .GetSyntaxRootAsync(cancellationToken)
-                .ConfigureAwait(false);
-            SyntaxNode newRoot = oldRoot
-                .ReplaceNode(methodDecl, newMethodDeclaration);
-            return document.WithSyntaxRoot(newRoot);
-        }
-
-        private async Task<Document> MakePublicAsync(Document document
-            , MethodDeclarationSyntax methodDecl
-            , CancellationToken cancellationToken)
-        {
-            var accessModifiers = methodDecl
-                .ChildNodesAndTokens()
-                .Where(child =>  child.IsToken && IsAnAccessibilityKeyword(child.AsToken()))
-            ;
-            if (!accessModifiers.Any())
-            {
-                return await InsertPublicKeyword(document, methodDecl, cancellationToken);
-            } else
-            {
-                return await RemoveAccessibilityModifiers(document, methodDecl, cancellationToken);
-            }
         }
     }
 }
