@@ -60,35 +60,35 @@
             IEnumerable<InvalidRegexTestSituation> InvalidRegExes = new List<InvalidRegexTestSituation> {
                 new InvalidRegexTestSituation {
                     RegexPattern = "\\",
-                    ExpectedError = "Invalid pattern '\\' at offset 1. Illegal \\\\ at end of pattern.",
+                    ExpectedError = "Invalid regex: Invalid pattern '\\' at offset 1. Illegal \\\\ at end of pattern.",
                 },
                 new InvalidRegexTestSituation {
                     RegexPattern = "[",
-                    ExpectedError = "Invalid pattern '[' at offset 1. Unterminated [] set."
+                    ExpectedError = "Invalid regex: Invalid pattern '[' at offset 1. Unterminated [] set."
                 },
                 new InvalidRegexTestSituation {
                     RegexPattern = "*",
-                    ExpectedError = "Invalid pattern '*' at offset 1. Quantifier {x,y} following nothing."
+                    ExpectedError = "Invalid regex: Invalid pattern '*' at offset 1. Quantifier {x,y} following nothing."
                 },
                 new InvalidRegexTestSituation
                 {
                     RegexPattern = "?",
-                    ExpectedError = "Invalid pattern '?' at offset 1. Quantifier {x,y} following nothing."
+                    ExpectedError = "Invalid regex: Invalid pattern '?' at offset 1. Quantifier {x,y} following nothing."
                 },
                 new InvalidRegexTestSituation
                 {
                     RegexPattern = "+",
-                    ExpectedError = "Invalid pattern '+' at offset 1. Quantifier {x,y} following nothing."
+                    ExpectedError = "Invalid regex: Invalid pattern '+' at offset 1. Quantifier {x,y} following nothing."
                 },
                 new InvalidRegexTestSituation
                 {
                     RegexPattern = "(",
-                    ExpectedError = "Invalid pattern '(' at offset 1. Not enough )'s."
+                    ExpectedError = "Invalid regex: Invalid pattern '(' at offset 1. Not enough )'s."
                 },
                 new InvalidRegexTestSituation
                 {
                     RegexPattern = ")",
-                    ExpectedError = "Invalid pattern ')' at offset 1. Too many )'s."
+                    ExpectedError = "Invalid regex: Invalid pattern ')' at offset 1. Too many )'s."
                 },
             };
             

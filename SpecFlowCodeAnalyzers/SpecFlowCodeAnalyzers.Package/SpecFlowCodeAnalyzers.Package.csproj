@@ -10,7 +10,7 @@
   <PropertyGroup>
     <PackageId>SpecFlowCodeAnalyzers</PackageId>
     <PackageVersion>1.0.0.0</PackageVersion>
-    <Authors>gerbe</Authors>
+    <Authors>Gerben van Adrichem</Authors>
     <PackageLicenseUrl>http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE</PackageLicenseUrl>
     <PackageProjectUrl>http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE</PackageProjectUrl>
     <PackageIconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</PackageIconUrl>

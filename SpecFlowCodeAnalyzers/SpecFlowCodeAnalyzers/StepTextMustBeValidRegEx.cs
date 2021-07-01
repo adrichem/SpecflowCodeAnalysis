@@ -60,7 +60,7 @@
                         .FirstOrDefault()
                         ?.GetLocation()
                     ;
-                    Context.ReportDiagnostic(Diagnostic.Create(Rule, LocationofString, e.Message));
+                    Context.ReportDiagnostic(Diagnostic.Create(Rule, LocationofString, $"Invalid regex: {e.Message}"));
                 }
             }
 

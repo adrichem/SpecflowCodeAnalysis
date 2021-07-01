@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SpecFlowCodeAnalyzers\SpecFlowCodeAnalyzers\SpecFlowCodeAnalyzers.csproj" />
+    <ProjectReference Include="..\SpecFlowCodeAnalyzers\SpecFlowCodeAnalyzers.csproj" />
   </ItemGroup>
 
 </Project>

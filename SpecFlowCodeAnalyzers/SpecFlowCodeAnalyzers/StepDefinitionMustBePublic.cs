@@ -49,7 +49,7 @@
                 {
                     Context.ReportDiagnostic(Diagnostic.Create(Rule
                         , MethodSymbol.Locations.First()
-                        , $"{MethodSymbol.ReceiverType}.{MethodSymbol.Name}")
+                        , $"Should be public: {MethodSymbol.Name}")
                     );
                 }
             }

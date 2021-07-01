@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpecFlowCodeAnalyzers.Test"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpecFlowCodeAnalyzers.Vsix", "SpecFlowCodeAnalyzers\SpecFlowCodeAnalyzers.Vsix\SpecFlowCodeAnalyzers.Vsix.csproj", "{C4DFCA9D-467B-49B2-BD25-E0EE35628508}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpecFlowCodeAnalyzers.CodeFixes", "SpecFlowCodeAnalyzers.CodeFixes\SpecFlowCodeAnalyzers.CodeFixes.csproj", "{C7140964-8A74-4CF5-9746-F1AAE547E0E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpecFlowCodeAnalyzers.CodeFixes", "SpecFlowCodeAnalyzers\SpecFlowCodeAnalyzers.CodeFixes\SpecFlowCodeAnalyzers.CodeFixes.csproj", "{93CAC053-DD96-47DA-970A-65960F8DD0D7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,10 +41,10 @@ Global
 		{C4DFCA9D-467B-49B2-BD25-E0EE35628508}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C4DFCA9D-467B-49B2-BD25-E0EE35628508}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C4DFCA9D-467B-49B2-BD25-E0EE35628508}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C7140964-8A74-4CF5-9746-F1AAE547E0E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C7140964-8A74-4CF5-9746-F1AAE547E0E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C7140964-8A74-4CF5-9746-F1AAE547E0E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C7140964-8A74-4CF5-9746-F1AAE547E0E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93CAC053-DD96-47DA-970A-65960F8DD0D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93CAC053-DD96-47DA-970A-65960F8DD0D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93CAC053-DD96-47DA-970A-65960F8DD0D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93CAC053-DD96-47DA-970A-65960F8DD0D7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
