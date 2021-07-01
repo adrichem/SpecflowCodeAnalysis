@@ -52,42 +52,85 @@
                 diagnostic);
         }
 
+        private bool IsAnAccessibilityKeyword(SyntaxToken child)
+        {
+            return child.IsKind(SyntaxKind.PrivateKeyword)
+                || child.IsKind(SyntaxKind.ProtectedKeyword)
+                || child.IsKind(SyntaxKind.InternalKeyword);
+        }
+
+        private async Task<Document> RemoveAccessibilityModifiers(Document document
+            , MethodDeclarationSyntax methodDecl
+            , CancellationToken cancellationToken)
+        {
+            SyntaxTriviaList leadingTrivia = methodDecl
+                .ReturnType
+                .GetLeadingTrivia();
+
+            SyntaxToken publicToken = SyntaxFactory.Token(leadingTrivia, SyntaxKind.PublicKeyword, SyntaxFactory.TriviaList(SyntaxFactory.ElasticMarker));
+
+            var newModifiers = methodDecl
+                .Modifiers
+                .Where(m => !IsAnAccessibilityKeyword(m))
+                .Concat(new List<SyntaxToken> { publicToken })
+            ;
+            MethodDeclarationSyntax newMethodDeclaration = methodDecl.WithModifiers(new SyntaxTokenList(newModifiers));
+
+            SyntaxNode oldRoot = await document
+                .GetSyntaxRootAsync(cancellationToken)
+                .ConfigureAwait(false);
+            SyntaxNode newRoot = oldRoot
+                .ReplaceNode(methodDecl, newMethodDeclaration);
+
+
+
+            return document.WithSyntaxRoot(newRoot);
+        }
+
+
+        /// <summary>
+        /// Inserts the 'public' keyword before the return type of the method
+        /// </summary>
+        /// <param name="document"></param>
+        /// <param name="methodDecl"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        private async Task<Document> InsertPublicKeyword(Document document
+            , MethodDeclarationSyntax methodDecl
+            , CancellationToken cancellationToken)
+        {
+            SyntaxTriviaList leadingTrivia = methodDecl
+                .ReturnType
+                .GetLeadingTrivia();
+            
+            SyntaxToken publicToken = SyntaxFactory.Token(leadingTrivia, SyntaxKind.PublicKeyword, SyntaxFactory.TriviaList(SyntaxFactory.ElasticMarker));
+
+            MethodDeclarationSyntax newMethodDeclaration = methodDecl
+                .WithModifiers(methodDecl.Modifiers.Insert(0,publicToken));
+            
+            SyntaxNode oldRoot = await document
+                .GetSyntaxRootAsync(cancellationToken)
+                .ConfigureAwait(false);
+            SyntaxNode newRoot = oldRoot
+                .ReplaceNode(methodDecl, newMethodDeclaration);
+            return document.WithSyntaxRoot(newRoot);
+        }
+
         private async Task<Document> MakePublicAsync(Document document
             , MethodDeclarationSyntax methodDecl
             , CancellationToken cancellationToken)
         {
-            var accessModifier = methodDecl
-                .ChildNodes()
-                .Where(child => child.IsKind(SyntaxKind.PrivateKeyword) || child.IsKind(SyntaxKind.ProtectedKeyword) || child.IsKind(SyntaxKind.InternalKeyword))
-                .FirstOrDefault()
+            var accessModifiers = methodDecl
+                .ChildNodesAndTokens()
+                .Where(child =>  child.IsToken && IsAnAccessibilityKeyword(child.AsToken()))
             ;
-            if (null == accessModifier) return document;
-
-            SyntaxToken token = accessModifier.GetFirstToken();
-            var leadingTrivia = accessModifier.GetLeadingTrivia();
-            var trailingTrivia = accessModifier.GetTrailingTrivia();
-
-            // Remove the leading trivia from the method declaration.
-            var trimmedLocal = methodDecl.ReplaceToken(token, token.WithLeadingTrivia(SyntaxTriviaList.Empty));
-            SyntaxToken publicToken = SyntaxFactory.Token(leadingTrivia, SyntaxKind.PublicKeyword, SyntaxFactory.TriviaList(SyntaxFactory.ElasticMarker));
-
-            // Insert the public token into the modifiers list, creating a new modifiers list.
-            SyntaxTokenList newModifiers = trimmedLocal.Modifiers.Insert(0, publicToken);
-
-            // Produce the new local declaration.
-            var newLocal = trimmedLocal.WithModifiers(newModifiers);
-
-            // Add an annotation to format the new local declaration.
-            var formattedLocal = newLocal.WithAdditionalAnnotations(Formatter.Annotation);
-
-            // Replace the old local declaration with the new local declaration.
-            SyntaxNode oldRoot = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
-            SyntaxNode newRoot = oldRoot.ReplaceNode(methodDecl, formattedLocal);
-
-            // Return document with transformed tree.
-            return document.WithSyntaxRoot(newRoot);
-
-
+            if (!accessModifiers.Any())
+            {
+                return await InsertPublicKeyword(document, methodDecl, cancellationToken);
+            } else
+            {
+                return await RemoveAccessibilityModifiers(document, methodDecl, cancellationToken);
+            }
         }
     }
 }

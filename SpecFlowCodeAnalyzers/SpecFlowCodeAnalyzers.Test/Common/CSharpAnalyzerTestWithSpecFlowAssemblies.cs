@@ -6,12 +6,12 @@
     using Microsoft.CodeAnalysis.Testing;
     using Microsoft.CodeAnalysis.Testing.Verifiers;
 
-    public class TestWithSpecFlowAssemblies<TAnalyzer> : CSharpAnalyzerTest<TAnalyzer, MSTestVerifier> where TAnalyzer : DiagnosticAnalyzer, new()
+    public class CSharpAnalyzerTestWithSpecFlowAssemblies<TAnalyzer> : CSharpAnalyzerTest<TAnalyzer, MSTestVerifier> where TAnalyzer : DiagnosticAnalyzer, new()
     {
         /// <summary>
         /// A <see cref="CSharpAnalyzerTest"/> with references to the SpecFlow assembly
         /// </summary>
-        public TestWithSpecFlowAssemblies()
+        public CSharpAnalyzerTestWithSpecFlowAssemblies()
         {
             SolutionTransforms.Add((solution, projectId) =>
             {
@@ -35,13 +35,13 @@
             });
         }
 
-        public TestWithSpecFlowAssemblies<TAnalyzer> WithCode(string x)
+        public CSharpAnalyzerTestWithSpecFlowAssemblies<TAnalyzer> WithCode(string x)
         {
             TestCode = x;
             return this;
         }
 
-        public TestWithSpecFlowAssemblies<TAnalyzer> WithExpectedDiagnostic(DiagnosticResult x)
+        public CSharpAnalyzerTestWithSpecFlowAssemblies<TAnalyzer> WithExpectedDiagnostic(DiagnosticResult x)
         {
             ExpectedDiagnostics.Add(x);
             return this;

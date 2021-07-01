@@ -48,7 +48,7 @@
             ;
             foreach(var x in Tests)
             {
-                await new TestWithSpecFlowAssemblies<StepTextMustBeValidRegEx>()
+                await new CSharpAnalyzerTestWithSpecFlowAssemblies<StepTextMustBeValidRegEx>()
                         .WithCode(CodeTemplate.Replace("[ATTR]", $"[{x.Attribute}(@\"{x.RegexPattern}\")]"))
                         .RunAsync(CancellationToken.None);
             }
@@ -152,7 +152,7 @@
 
             Task CreateTestTask(InvalidRegexTestSituation Situation)
             {
-                return new TestWithSpecFlowAssemblies<StepTextMustBeValidRegEx>()
+                return new CSharpAnalyzerTestWithSpecFlowAssemblies<StepTextMustBeValidRegEx>()
                     .WithCode(CodeTemplate.Replace("[ATTR]", $"[{Situation.Attribute}(@\"{Situation.RegexPattern}\")]"))
                     .WithExpectedDiagnostic(new DiagnosticResult(StepTextMustBeValidRegEx.DiagnosticId, DiagnosticSeverity.Error)
                         .WithSpan(Situation.LineStart, Situation.ColumnStart, Situation.LineEnd, Situation.ColumnEnd)

@@ -10,6 +10,7 @@
     using SpecFlowCodeAnalyzers.Test.Common;
     using System;
     using System.Linq;
+    using SpecFlowCodeAnalyzers.CodeFixes;
 
     [TestClass]
     public class StepDefinitionMustBePublicUnitTest
@@ -28,7 +29,60 @@
                 .WithSpan(x1, y1, x2, y2)
         ;
 
+
         [TestMethod]
+        public async Task CodeFixPrivates()
+        {
+            string CodeToFix = @"
+using TechTalk.SpecFlow;
+    
+namespace ConsoleApplication1
+{
+    [Binding]    
+    public class MyTestCode
+    {   
+        [Given]
+        void Method1() {}
+
+        [Given]
+        private void Method2() {}
+
+        public void NotAStepDefinition() {}
+
+        private void NotAStepDefinitionPrivate() {}
+    }
+}";
+
+            string ExpectedFix = @"
+using TechTalk.SpecFlow;
+    
+namespace ConsoleApplication1
+{
+    [Binding]    
+    public class MyTestCode
+    {   
+        [Given]
+        public void Method1() {}
+
+        [Given]
+        public void Method2() {}
+
+        public void NotAStepDefinition() {}
+
+        private void NotAStepDefinitionPrivate() {}
+    }
+}";
+
+            await new CSharpCodeFixTestWithSpecFlowAssemblies<StepDefinitionMustBePublic, StepDefinitionMustBePublicCodeProvider>()
+                .WithCode(CodeToFix)
+                .WithExpectedDiagnostic(ExpectedDiagnostic(10, 14, 10, 21))
+                .WithExpectedDiagnostic(ExpectedDiagnostic(13, 22, 13, 29))
+                .WithFixCode(ExpectedFix)
+                .RunAsync()
+            ;
+        }
+
+            [TestMethod]
         public void CombiningAttrbutesInSingleAttributeList()
         {
             string CodeTemplate = @"
@@ -50,7 +104,7 @@
                 }";
 
             var Tasks = AccessModifiers
-                .Select(AccessModifier => new TestWithSpecFlowAssemblies<StepDefinitionMustBePublic>()
+                .Select(AccessModifier => new CSharpAnalyzerTestWithSpecFlowAssemblies<StepDefinitionMustBePublic>()
                         .WithCode(CodeTemplate.Replace("[ACCESS]", AccessModifier))
                         .WithExpectedDiagnostic(ExpectedDiagnostic(11, 30, 11, 37))
                         .RunAsync())
@@ -90,7 +144,7 @@
             ;
 
             var Tasks = AccessModifiers
-                .Select(AccessModifier => new TestWithSpecFlowAssemblies<StepDefinitionMustBePublic>()
+                .Select(AccessModifier => new CSharpAnalyzerTestWithSpecFlowAssemblies<StepDefinitionMustBePublic>()
                     .WithCode(CodeTemplate.Replace("[ACCESS]", AccessModifier))
                     .WithExpectedDiagnostic(ExpectedDiagnostic(14, 30, 14, 31))
                     .WithExpectedDiagnostic(ExpectedDiagnostic(18, 30, 18, 33))
@@ -129,7 +183,7 @@
                     }
                 }";
 
-            Task.WaitAll(new Task[] {new TestWithSpecFlowAssemblies<StepDefinitionMustBePublic>()
+            Task.WaitAll(new Task[] {new CSharpAnalyzerTestWithSpecFlowAssemblies<StepDefinitionMustBePublic>()
                 .WithCode(CodeTemplate)
                 .RunAsync(CancellationToken.None) })
             ;
