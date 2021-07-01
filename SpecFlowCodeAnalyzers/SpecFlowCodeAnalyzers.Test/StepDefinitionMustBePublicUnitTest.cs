@@ -84,7 +84,7 @@ namespace ConsoleApplication1
         }
 
             [TestMethod]
-        public void CombiningAttrbutesInSingleAttributeList()
+        public async Task CombiningAttrbutesInSingleAttributeList()
         {
             string CodeTemplate = @"
                 using TechTalk.SpecFlow;
@@ -109,14 +109,17 @@ namespace ConsoleApplication1
                         .WithCode(CodeTemplate.Replace("[ACCESS]", AccessModifier))
                         .WithExpectedDiagnostic(ExpectedDiagnostic(11, 30, 11, 37))
                         .RunAsync())
-                .ToArray()
             ;
-            Task.WaitAll(Tasks);
+                
+            foreach(var T in Tasks)
+            {
+                await T;
+            }
 
         }
 
         [TestMethod]
-        public void MultipleBindingsOnsameMethodMustStillRaiseDiagnostic()
+        public async Task MultipleBindingsOnsameMethodMustStillRaiseDiagnostic()
         {
             string CodeTemplate = @"
                 using TechTalk.SpecFlow;
@@ -150,13 +153,15 @@ namespace ConsoleApplication1
                     .WithExpectedDiagnostic(ExpectedDiagnostic(14, 30, 14, 31))
                     .WithExpectedDiagnostic(ExpectedDiagnostic(18, 30, 18, 33))
                     .RunAsync())
-                .ToArray()
-           ;
-            Task.WaitAll(Tasks);
+            ;
+            foreach (var T in Tasks)
+            {
+                await T;
+            }
         }
 
         [TestMethod]
-        public void PublicStepDefinitionMayNotRaiseDiagnostic()
+        public async Task PublicStepDefinitionMayNotRaiseDiagnostic()
         {
             string CodeTemplate = @"
                 using TechTalk.SpecFlow;
@@ -184,9 +189,9 @@ namespace ConsoleApplication1
                     }
                 }";
 
-            Task.WaitAll(new Task[] {new CSharpAnalyzerTestWithSpecFlowAssemblies<StepDefinitionMustBePublic>()
+            await new CSharpAnalyzerTestWithSpecFlowAssemblies<StepDefinitionMustBePublic>()
                 .WithCode(CodeTemplate)
-                .RunAsync(CancellationToken.None) })
+                .RunAsync(CancellationToken.None) 
             ;
         }
 
