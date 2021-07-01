@@ -9,7 +9,7 @@
 
   <PropertyGroup>
     <PackageId>SpecFlowCodeAnalyzers</PackageId>
-    <PackageVersion>1.0.0.0</PackageVersion>
+    <PackageVersion>1.0.0.3</PackageVersion>
     <Authors>Gerben van Adrichem</Authors>
     <PackageLicenseUrl>http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE</PackageLicenseUrl>
     <PackageProjectUrl>http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE</PackageProjectUrl>
@@ -24,9 +24,16 @@
     <NoPackageAnalysis>true</NoPackageAnalysis>
 
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddAnalyzersToOutput</TargetsForTfmSpecificContentInPackage>
+
+    <AssemblyVersion>1.0.0.1</AssemblyVersion>
+
+    <FileVersion>1.0.0.1</FileVersion>
+
+    <Version>1.0.3</Version>
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SpecFlowCodeAnalyzers.CodeFixes\SpecFlowCodeAnalyzers.CodeFixes.csproj" />
     <ProjectReference Include="..\SpecFlowCodeAnalyzers\SpecFlowCodeAnalyzers.csproj" />
   </ItemGroup>
 
@@ -37,6 +44,7 @@
   <Target Name="_AddAnalyzersToOutput">
     <ItemGroup>
       <TfmSpecificPackageFile Include="$(OutputPath)\SpecFlowCodeAnalyzers.dll" PackagePath="analyzers/dotnet/cs" />
+      <TfmSpecificPackageFile Include="$(OutputPath)\SpecFlowCodeAnalyzers.CodeFixes.dll" PackagePath="analyzers/dotnet/cs" />
     </ItemGroup>
   </Target>
 
