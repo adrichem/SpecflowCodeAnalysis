@@ -1,0 +1,54 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>Adrichem.SpecFlow.Analyzers</PackageId>
+    <PackageVersion>1.0.6</PackageVersion>
+    <Authors>Gerben van Adrichem</Authors>
+    <PackageLicenseUrl></PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/adrichem/SpecflowCodeAnalysis</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/adrichem/SpecflowCodeAnalysis</RepositoryUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Description>Detects code smells in SpecFlow binding code.</Description>
+    <PackageReleaseNotes></PackageReleaseNotes>
+    <Copyright>Copyright Gerben van Adrichem</Copyright>
+    <PackageTags>specflow,code smell,smell,analyzer,codefix,roslyn</PackageTags>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddAnalyzersToOutput</TargetsForTfmSpecificContentInPackage>
+
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+
+    <FileVersion>1.0.0.0</FileVersion>
+
+    <Version>1.0.6</Version>
+
+    <Product>Adrichem.SpecFlow.Analyzers</Product>
+
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SpecFlowCodeAnalyzers.CodeFixes\SpecFlowCodeAnalyzers.CodeFixes.csproj" />
+    <ProjectReference Include="..\SpecFlowCodeAnalyzers\SpecFlowCodeAnalyzers.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="tools\*.ps1" CopyToOutputDirectory="Always" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <Target Name="_AddAnalyzersToOutput">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(OutputPath)\SpecFlowCodeAnalyzers.dll" PackagePath="analyzers/dotnet/cs" />
+      <TfmSpecificPackageFile Include="$(OutputPath)\SpecFlowCodeAnalyzers.CodeFixes.dll" PackagePath="analyzers/dotnet/cs" />
+    </ItemGroup>
+  </Target>
+
+</Project>
