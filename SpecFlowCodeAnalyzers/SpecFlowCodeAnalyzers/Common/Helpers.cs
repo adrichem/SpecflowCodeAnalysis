@@ -2,6 +2,7 @@
 {
     using Microsoft.CodeAnalysis;
     using System.Collections.Generic;
+    using System.Linq;
 
     internal class Helpers
     {
@@ -15,6 +16,17 @@
                 C.GetTypeByMetadataName("TechTalk.SpecFlow.ThenAttribute"),
                 C.GetTypeByMetadataName("TechTalk.SpecFlow.StepDefinitionAttribute"),
             };
+        }
+
+
+        public static bool MethodHasSpecFlowAtributes(IMethodSymbol M, Compilation C)
+        {
+            var AttributeTypesToCheck = GetStepDefinitionTypeSymbols(C);
+            bool result = M
+                .GetAttributes()
+                .Any(a => AttributeTypesToCheck.Any(x => SymbolEqualityComparer.Default.Equals(a.AttributeClass, x)))
+            ;
+            return result;
         }
     }
 }

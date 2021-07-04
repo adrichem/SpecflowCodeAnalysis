@@ -31,25 +31,16 @@
             context.RegisterSymbolAction(AnalyzeMethod, SymbolKind.Method);
         }
 
-        private static void AnalyzeMethod(SymbolAnalysisContext Context)
+        private static void AnalyzeMethod(SymbolAnalysisContext c)
         {
-            IMethodSymbol MethodSymbol = Context.Symbol as IMethodSymbol;
-            if (MethodSymbol.DeclaredAccessibility != Accessibility.Public)
+            IMethodSymbol m = c.Symbol as IMethodSymbol;
+            if (m.DeclaredAccessibility != Accessibility.Public &&
+                Helpers.MethodHasSpecFlowAtributes(m, c.Compilation))
             {
-                var AttributeTypesToCheck = Helpers.GetStepDefinitionTypeSymbols(Context.Compilation);
-                bool MethodHasSpecFlowAtributes = MethodSymbol
-                    .GetAttributes()
-                    .Where(a => AttributeTypesToCheck.Any(x => SymbolEqualityComparer.Default.Equals(a.AttributeClass, x)))
-                    .Any()
-                ;
-
-                if (MethodHasSpecFlowAtributes)
-                {
-                    Context.ReportDiagnostic(Diagnostic.Create(Rule
-                        , MethodSymbol.Locations.First()
-                        , $"Must be public: {MethodSymbol.Name}")
-                    );
-                }
+                c.ReportDiagnostic(Diagnostic.Create(Rule
+                    , m.Locations.First()
+                    , $"Must be public: {m.Name}")
+                );
             }
         }
     }

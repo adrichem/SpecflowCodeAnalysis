@@ -14,12 +14,12 @@
     using System.Threading.Tasks;
 
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(StepDefinitionMustBePublicCodeProvider)), Shared]
-    public class StepDefinitionMustBePublicCodeProvider : CodeFixProvider
+    public class ParameterMayNotBeOutCodeFixProvider : CodeFixProvider
     {
-        private static readonly string Title = "Make public";
+        private static readonly string Title = "Remove 'out' keyword";
         public sealed override ImmutableArray<string> FixableDiagnosticIds
         {
-            get { return ImmutableArray.Create(SpecFlowCodeAnalyzersDiagnosticIds.MustBePublicMethod); }
+            get { return ImmutableArray.Create(SpecFlowCodeAnalyzersDiagnosticIds.NoOutParameters); }
         }
 
         public sealed override FixAllProvider GetFixAllProvider()
@@ -36,46 +36,32 @@
             var declaration = root.FindToken(diagnosticSpan.Start)
                 .Parent
                 .AncestorsAndSelf()
-                .OfType<MethodDeclarationSyntax>()
+                .OfType<ParameterSyntax>()
                 .First()
              ;
             context.RegisterCodeFix(
                 CodeAction.Create(
                     title: Title,
-                    createChangedDocument: c => MakePublicAsync(context.Document, declaration, c),
+                    createChangedDocument: c => RemoveOutAsync(context.Document, declaration, c),
                     equivalenceKey: Title),
                 diagnostic);
         }
 
-        private bool IsAnAccessibilityKeyword(SyntaxToken child)
-        {
-            return child.IsKind(SyntaxKind.PrivateKeyword)
-                || child.IsKind(SyntaxKind.ProtectedKeyword)
-                || child.IsKind(SyntaxKind.InternalKeyword);
-        }
-
-        private async Task<Document> MakePublicAsync(Document document
-            , MethodDeclarationSyntax methodDecl
+        private async Task<Document> RemoveOutAsync(Document document
+            , ParameterSyntax param
             , CancellationToken cancellationToken)
         {
-            SyntaxTriviaList leadingTrivia = methodDecl
-                .ReturnType
-                .GetLeadingTrivia();
-
-            SyntaxToken publicToken = SyntaxFactory.Token(leadingTrivia, SyntaxKind.PublicKeyword, SyntaxFactory.TriviaList(SyntaxFactory.ElasticMarker));
-
-            var newModifiers = methodDecl
+            var newModifiers = param
                 .Modifiers
-                .Where(m => !IsAnAccessibilityKeyword(m))
-                .Concat(new List<SyntaxToken> { publicToken })
+                .Where(m => !m.IsKind(SyntaxKind.OutKeyword))
             ;
-            MethodDeclarationSyntax newMethodDeclaration = methodDecl.WithModifiers(new SyntaxTokenList(newModifiers));
+
+            ParameterSyntax newParameterDeclaration = param.WithModifiers(new SyntaxTokenList(newModifiers));
 
             SyntaxNode oldRoot = await document
                 .GetSyntaxRootAsync(cancellationToken)
                 .ConfigureAwait(false);
-
-            return document.WithSyntaxRoot(oldRoot.ReplaceNode(methodDecl, newMethodDeclaration));
+            return document.WithSyntaxRoot(oldRoot.ReplaceNode(param, newParameterDeclaration));
         }
     }
 }
