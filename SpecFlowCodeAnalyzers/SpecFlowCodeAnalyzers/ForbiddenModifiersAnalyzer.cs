@@ -9,14 +9,14 @@
     using System.Linq;
 
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public class ParameterMayNotBeOutAnalyzer : DiagnosticAnalyzer
+    public class ForbiddenModifiersAnalyzer : DiagnosticAnalyzer
     {
-        private static readonly string Title = "Parameter may not have out keyword";
+        private static readonly string Title = "Parameter may not have out or ref modifier";
         private static readonly string MessageFormat = "{0}";
-        private static readonly string Description = "A step definition may not have out parameters.";
+        private static readonly string Description = "A step definition may not have out or ref parameters.";
 
         private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(
-            SpecFlowCodeAnalyzersDiagnosticIds.NoOutParameters
+            SpecFlowCodeAnalyzersDiagnosticIds.ForbiddenModifier
             , Title
             , MessageFormat
             , Helpers.DiagnosticCategory
@@ -52,10 +52,10 @@
         private void AnalyzeParameter(ParameterSyntax p, SymbolAnalysisContext c)
         {
              p.ChildTokens()
-                .Where(token => token.IsKind(SyntaxKind.OutKeyword))
+                .Where(token => token.IsKind(SyntaxKind.OutKeyword) || token.IsKind(SyntaxKind.RefKeyword))
                 .ForEach(o => c.ReportDiagnostic(Diagnostic.Create(Rule
                     , o.GetLocation()
-                    , $"out keyword not allowed on step definition method"))
+                    , $"modifier not allowed on step definition method"))
                 )
             ;
         }
