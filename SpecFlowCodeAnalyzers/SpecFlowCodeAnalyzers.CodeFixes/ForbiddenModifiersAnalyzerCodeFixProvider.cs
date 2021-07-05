@@ -1,25 +1,25 @@
 ﻿namespace SpecFlowCodeAnalyzers.CodeFixes
 {
+    using Adrichem.Test.SpecFlowCodeAnalyzers;
     using Adrichem.Test.SpecFlowCodeAnalyzers.Common;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CodeActions;
     using Microsoft.CodeAnalysis.CodeFixes;
     using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
-    using System.Collections.Generic;
     using System.Collections.Immutable;
     using System.Composition;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
 
-    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(StepDefinitionMustBePublicCodeProvider)), Shared]
-    public class ParameterMayNotBeOutCodeFixProvider : CodeFixProvider
+    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(ForbiddenModifiersAnalyzer)), Shared]
+    public class ForbiddenModifiersAnalyzerCodeFixProvider : CodeFixProvider
     {
-        private static readonly string Title = "Remove 'out' keyword";
+        private static readonly string Title = "Remove 'out' or 'ref' modifiers";
         public sealed override ImmutableArray<string> FixableDiagnosticIds
         {
-            get { return ImmutableArray.Create(SpecFlowCodeAnalyzersDiagnosticIds.NoOutParameters); }
+            get { return ImmutableArray.Create(SpecFlowCodeAnalyzersDiagnosticIds.ForbiddenModifier); }
         }
 
         public sealed override FixAllProvider GetFixAllProvider()
@@ -42,18 +42,18 @@
             context.RegisterCodeFix(
                 CodeAction.Create(
                     title: Title,
-                    createChangedDocument: c => RemoveOutAsync(context.Document, declaration, c),
+                    createChangedDocument: c => RemoveForbiddenModifiers(context.Document, declaration, c),
                     equivalenceKey: Title),
                 diagnostic);
         }
 
-        private async Task<Document> RemoveOutAsync(Document document
+        private async Task<Document> RemoveForbiddenModifiers(Document document
             , ParameterSyntax param
             , CancellationToken cancellationToken)
         {
             var newModifiers = param
                 .Modifiers
-                .Where(m => !m.IsKind(SyntaxKind.OutKeyword))
+                .Where(m => !m.IsKind(SyntaxKind.OutKeyword) && !m.IsKind(SyntaxKind.RefKeyword))
             ;
 
             ParameterSyntax newParameterDeclaration = param.WithModifiers(new SyntaxTokenList(newModifiers));

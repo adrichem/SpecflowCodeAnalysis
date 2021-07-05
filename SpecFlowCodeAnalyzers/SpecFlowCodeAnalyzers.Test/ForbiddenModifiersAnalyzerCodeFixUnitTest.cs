@@ -11,7 +11,7 @@
     using SpecFlowCodeAnalyzers.CodeFixes;
 
     /// <summary>
-    /// A unit test for <see cref="ParameterMayNotBeOutCodeFixProvider"/>.
+    /// A unit test for <see cref="ForbiddenModifiersAnalyzerCodeFixProvider"/>.
     /// 
     /// Tests the following situations on removing the out keyword from a parameter list:
     /// <list type="table">
@@ -32,10 +32,10 @@
     /// </list>
     /// </summary>
     [TestClass]
-    public class ParametersMayNotBeOutCodeFixUnitTest
+    public class ForbiddenModifiersAnalyzerCodeFixUnitTest
     {
         private readonly Func<int,int,int,int, DiagnosticResult> ExpectedDiagnostic = (x1,y1,x2,y2) => 
-            new DiagnosticResult(SpecFlowCodeAnalyzersDiagnosticIds.NoOutParameters
+            new DiagnosticResult(SpecFlowCodeAnalyzersDiagnosticIds.ForbiddenModifier
                 , DiagnosticSeverity.Warning
                 )
                 .WithSpan(x1, y1, x2, y2)
@@ -64,12 +64,19 @@
                         public void TestMethod(int a) { a = 1; }
                     }
                 }";                
-            await new CSharpCodeFixTestWithSpecFlowAssemblies<ParameterMayNotBeOutAnalyzer,ParameterMayNotBeOutCodeFixProvider>()
+            await new CSharpCodeFixTestWithSpecFlowAssemblies<ForbiddenModifiersAnalyzer,ForbiddenModifiersAnalyzerCodeFixProvider>()
                 .WithCode(CodeTemplate)
                 .WithExpectedDiagnostic(ExpectedDiagnostic(8, 48, 8, 51))
                 .WithFixCode(ExpectedResult)
                 .RunAsync()
             ;
+
+            await new CSharpCodeFixTestWithSpecFlowAssemblies<ForbiddenModifiersAnalyzer, ForbiddenModifiersAnalyzerCodeFixProvider>()
+               .WithCode(CodeTemplate.Replace("out","ref"))
+               .WithExpectedDiagnostic(ExpectedDiagnostic(8, 48, 8, 51))
+               .WithFixCode(ExpectedResult)
+               .RunAsync()
+           ;
         }
 
         [TestMethod]
@@ -95,8 +102,16 @@
                         public void TestMethod(int a,int b,int c, int d) { b = 1; c = 1; }
                     }
                 }";                
-            await new CSharpCodeFixTestWithSpecFlowAssemblies<ParameterMayNotBeOutAnalyzer,ParameterMayNotBeOutCodeFixProvider>()
+            await new CSharpCodeFixTestWithSpecFlowAssemblies<ForbiddenModifiersAnalyzer,ForbiddenModifiersAnalyzerCodeFixProvider>()
                 .WithCode(CodeTemplate)
+                .WithExpectedDiagnostic(ExpectedDiagnostic(8, 54, 8, 57))
+                .WithExpectedDiagnostic(ExpectedDiagnostic(8, 64, 8, 67))
+                .WithFixCode(ExpectedResult)
+                .RunAsync()
+            ;
+
+            await new CSharpCodeFixTestWithSpecFlowAssemblies<ForbiddenModifiersAnalyzer, ForbiddenModifiersAnalyzerCodeFixProvider>()
+                .WithCode(CodeTemplate.Replace("out", "ref"))
                 .WithExpectedDiagnostic(ExpectedDiagnostic(8, 54, 8, 57))
                 .WithExpectedDiagnostic(ExpectedDiagnostic(8, 64, 8, 67))
                 .WithFixCode(ExpectedResult)
@@ -127,12 +142,20 @@
                         public void TestMethod(int a) { a = 1; }
                     }
                 }";                
-            await new CSharpCodeFixTestWithSpecFlowAssemblies<ParameterMayNotBeOutAnalyzer,ParameterMayNotBeOutCodeFixProvider>()
+            await new CSharpCodeFixTestWithSpecFlowAssemblies<ForbiddenModifiersAnalyzer,ForbiddenModifiersAnalyzerCodeFixProvider>()
                 .WithCode(CodeTemplate)
                 .WithExpectedDiagnostic(ExpectedDiagnostic(8, 48, 8, 51))
                 .WithFixCode(ExpectedResult)
                 .RunAsync()
             ;
+            
+            await new CSharpCodeFixTestWithSpecFlowAssemblies<ForbiddenModifiersAnalyzer, ForbiddenModifiersAnalyzerCodeFixProvider>()
+                .WithCode(CodeTemplate.Replace("out", "ref"))
+                .WithExpectedDiagnostic(ExpectedDiagnostic(8, 48, 8, 51))
+                .WithFixCode(ExpectedResult)
+                .RunAsync()
+            ;
+            
         }
 
         [TestMethod]
@@ -158,13 +181,22 @@
                         public void TestMethod(int a,int b,int c, int d) { b = 1; c = 1; }
                     }
                 }";                
-            await new CSharpCodeFixTestWithSpecFlowAssemblies<ParameterMayNotBeOutAnalyzer,ParameterMayNotBeOutCodeFixProvider>()
+            await new CSharpCodeFixTestWithSpecFlowAssemblies<ForbiddenModifiersAnalyzer,ForbiddenModifiersAnalyzerCodeFixProvider>()
                 .WithCode(CodeTemplate)
                 .WithExpectedDiagnostic(ExpectedDiagnostic(8, 54, 8, 57))
                 .WithExpectedDiagnostic(ExpectedDiagnostic(8, 68, 8, 71))
                 .WithFixCode(ExpectedResult)
                 .RunAsync()
             ;
+
+            await new CSharpCodeFixTestWithSpecFlowAssemblies<ForbiddenModifiersAnalyzer, ForbiddenModifiersAnalyzerCodeFixProvider>()
+                .WithCode(CodeTemplate.Replace("out", "ref"))
+                .WithExpectedDiagnostic(ExpectedDiagnostic(8, 54, 8, 57))
+                .WithExpectedDiagnostic(ExpectedDiagnostic(8, 68, 8, 71))
+                .WithFixCode(ExpectedResult)
+                .RunAsync()
+            ;
+            
         }
 
         [TestMethod]
@@ -190,12 +222,20 @@
                         public void TestMethod(   int a) { a = 1; }
                     }
                 }";                
-            await new CSharpCodeFixTestWithSpecFlowAssemblies<ParameterMayNotBeOutAnalyzer,ParameterMayNotBeOutCodeFixProvider>()
+            await new CSharpCodeFixTestWithSpecFlowAssemblies<ForbiddenModifiersAnalyzer,ForbiddenModifiersAnalyzerCodeFixProvider>()
                 .WithCode(CodeTemplate)
                 .WithExpectedDiagnostic(ExpectedDiagnostic(8, 51, 8, 54))
                 .WithFixCode(ExpectedResult)
                 .RunAsync()
             ;
+
+            await new CSharpCodeFixTestWithSpecFlowAssemblies<ForbiddenModifiersAnalyzer, ForbiddenModifiersAnalyzerCodeFixProvider>()
+                .WithCode(CodeTemplate.Replace("out", "ref"))
+                .WithExpectedDiagnostic(ExpectedDiagnostic(8, 51, 8, 54))
+                .WithFixCode(ExpectedResult)
+                .RunAsync()
+            ;
+            
         }
 
         [TestMethod]
@@ -221,8 +261,16 @@
                         public void TestMethod(int a,   int b, int c, int d) { b = 1; c = 1; }
                     }
                 }";                
-            await new CSharpCodeFixTestWithSpecFlowAssemblies<ParameterMayNotBeOutAnalyzer,ParameterMayNotBeOutCodeFixProvider>()
+            await new CSharpCodeFixTestWithSpecFlowAssemblies<ForbiddenModifiersAnalyzer,ForbiddenModifiersAnalyzerCodeFixProvider>()
                 .WithCode(CodeTemplate)
+                .WithExpectedDiagnostic(ExpectedDiagnostic(8, 57, 8, 60))
+                .WithExpectedDiagnostic(ExpectedDiagnostic(8, 68, 8, 71))
+                .WithFixCode(ExpectedResult)
+                .RunAsync()
+            ;
+
+            await new CSharpCodeFixTestWithSpecFlowAssemblies<ForbiddenModifiersAnalyzer, ForbiddenModifiersAnalyzerCodeFixProvider>()
+                .WithCode(CodeTemplate.Replace("out", "ref"))
                 .WithExpectedDiagnostic(ExpectedDiagnostic(8, 57, 8, 60))
                 .WithExpectedDiagnostic(ExpectedDiagnostic(8, 68, 8, 71))
                 .WithFixCode(ExpectedResult)
@@ -253,12 +301,20 @@
                         public void TestMethod(     int a) { a = 1; }
                     }
                 }";                
-            await new CSharpCodeFixTestWithSpecFlowAssemblies<ParameterMayNotBeOutAnalyzer,ParameterMayNotBeOutCodeFixProvider>()
+            await new CSharpCodeFixTestWithSpecFlowAssemblies<ForbiddenModifiersAnalyzer,ForbiddenModifiersAnalyzerCodeFixProvider>()
                 .WithCode(CodeTemplate)
                 .WithExpectedDiagnostic(ExpectedDiagnostic(8, 53, 8, 56))
                 .WithFixCode(ExpectedResult)
                 .RunAsync()
             ;
+
+            await new CSharpCodeFixTestWithSpecFlowAssemblies<ForbiddenModifiersAnalyzer, ForbiddenModifiersAnalyzerCodeFixProvider>()
+                .WithCode(CodeTemplate.Replace("out", "ref"))
+                .WithExpectedDiagnostic(ExpectedDiagnostic(8, 53, 8, 56))
+                .WithFixCode(ExpectedResult)
+                .RunAsync()
+            ;
+
         }
 
         [TestMethod]
@@ -283,14 +339,23 @@
                         [Given,When,Then,StepDefinition]
                         public void TestMethod(int a, int b,        int c, int d) { b = 1; c = 1; }
                     }
-                }";                
-            await new CSharpCodeFixTestWithSpecFlowAssemblies<ParameterMayNotBeOutAnalyzer,ParameterMayNotBeOutCodeFixProvider>()
+                }";
+            await new CSharpCodeFixTestWithSpecFlowAssemblies<ForbiddenModifiersAnalyzer, ForbiddenModifiersAnalyzerCodeFixProvider>()
                 .WithCode(CodeTemplate)
                 .WithExpectedDiagnostic(ExpectedDiagnostic(8, 55, 8, 58))
                 .WithExpectedDiagnostic(ExpectedDiagnostic(8, 77, 8, 80))
                 .WithFixCode(ExpectedResult)
                 .RunAsync()
             ;
+
+            await new CSharpCodeFixTestWithSpecFlowAssemblies<ForbiddenModifiersAnalyzer, ForbiddenModifiersAnalyzerCodeFixProvider>()
+                .WithCode(CodeTemplate.Replace("out", "ref"))
+                .WithExpectedDiagnostic(ExpectedDiagnostic(8, 55, 8, 58))
+                .WithExpectedDiagnostic(ExpectedDiagnostic(8, 77, 8, 80))
+                .WithFixCode(ExpectedResult)
+                .RunAsync()
+            ;
+            
         }
 
     }

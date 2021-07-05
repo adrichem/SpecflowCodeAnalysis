@@ -41,18 +41,17 @@
         {
             var ValidRegexes = new List<string>
             {
-                "]", "{","}","{}",".*","(.*)","there must be [1-9][0-9]* items?"
+                "]", "{","}","{}",".*","(.*)","there must be [1-9][0-9]* items?", "aaa|", "|aaa|", "||||||(())"
             };
 
             var Tests = ValidRegexes
                 .SelectMany(vr => StepDefinitionAttributes, (RegexPattern, Attribute) => new { RegexPattern, Attribute })
-            ;
-            foreach(var x in Tests)
-            {
-                await new CSharpAnalyzerTestWithSpecFlowAssemblies<StepTextMustBeValidRegEx>()
+                .Select( x => new CSharpAnalyzerTestWithSpecFlowAssemblies<StepTextMustBeValidRegEx>()
                         .WithCode(CodeTemplate.Replace("[ATTR]", $"[{x.Attribute}(@\"{x.RegexPattern}\")]"))
-                        .RunAsync(CancellationToken.None);
-            }
+                        .RunAsync(CancellationToken.None))
+                .ToArray()
+            ;
+            await Task.WhenAll(Tests);
         }
 
         [TestMethod]
@@ -105,10 +104,8 @@
                 .ToArray()
             ;
 
-            foreach(var S in Situations)
-            {
-                await S;
-            }
+            await Task.WhenAll(Situations);
+
 
             InvalidRegexTestSituation CalculateLineStartAndEnd(InvalidRegexTestSituation Situation)
             {
