@@ -12,6 +12,7 @@ Install the NuGet package into your project. Visual Studio / VS Code will start 
 |SPECFLOW0001| The string of the Given()/When()/Then() attribute is not a valid regular expression. |
 |SPECFLOW0002| The step definition is not a public method.|
 |SPECFLOW0003| The step definition has `out` or `ref` modifier on a parameter.|
+|SPECFLOW0004| The step definition's class is not public.|
 
 ## BindingAnalyzer
 

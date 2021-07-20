@@ -14,7 +14,7 @@
     using System.Threading.Tasks;
 
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(ForbiddenModifiersAnalyzer)), Shared]
-    public class ForbiddenModifiersAnalyzerCodeFixProvider : CodeFixProvider
+    public class ForbiddenModifiersCodeFixProvider : CodeFixProvider
     {
         private static readonly string Title = "Remove 'out' or 'ref' modifiers";
         public sealed override ImmutableArray<string> FixableDiagnosticIds

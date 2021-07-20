@@ -7,7 +7,7 @@
     using System.Linq;
 
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public class StepDefinitionMustBePublic : DiagnosticAnalyzer
+    public class StepDefinitionMustBePublicAnalyzer : DiagnosticAnalyzer
     {
         private static readonly string Title = "Must be public";
         private static readonly string MessageFormat = "{0}";
@@ -34,8 +34,7 @@
         private static void AnalyzeMethod(SymbolAnalysisContext c)
         {
             IMethodSymbol m = c.Symbol as IMethodSymbol;
-            if (m.DeclaredAccessibility != Accessibility.Public &&
-                Helpers.MethodHasSpecFlowAtributes(m, c.Compilation))
+            if (m.DeclaredAccessibility != Accessibility.Public && m.SpecFlowAttributes(c.Compilation).Any())
             {
                 c.ReportDiagnostic(Diagnostic.Create(Rule
                     , m.Locations.First()

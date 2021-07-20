@@ -74,7 +74,7 @@ namespace ConsoleApplication1
     }
 }";
 
-            await new CSharpCodeFixTestWithSpecFlowAssemblies<StepDefinitionMustBePublic, StepDefinitionMustBePublicCodeProvider>()
+            await new CSharpCodeFixTestWithSpecFlowAssemblies<StepDefinitionMustBePublicAnalyzer, StepDefinitionMustBePublicCodeFixProvider>()
                 .WithCode(CodeToFix)
                 .WithExpectedDiagnostic(ExpectedDiagnostic(10, 14, 10, 21))
                 .WithExpectedDiagnostic(ExpectedDiagnostic(13, 22, 13, 29))
@@ -83,7 +83,7 @@ namespace ConsoleApplication1
             ;
         }
 
-            [TestMethod]
+        [TestMethod]
         public async Task CombiningAttrbutesInSingleAttributeList()
         {
             string CodeTemplate = @"
@@ -105,7 +105,7 @@ namespace ConsoleApplication1
                 }";
 
             var Tasks = AccessModifiers
-                .Select(AccessModifier => new CSharpAnalyzerTestWithSpecFlowAssemblies<StepDefinitionMustBePublic>()
+                .Select(AccessModifier => new CSharpAnalyzerTestWithSpecFlowAssemblies<StepDefinitionMustBePublicAnalyzer>()
                         .WithCode(CodeTemplate.Replace("[ACCESS]", AccessModifier))
                         .WithExpectedDiagnostic(ExpectedDiagnostic(11, 30, 11, 37))
                         .RunAsync())
@@ -148,7 +148,7 @@ namespace ConsoleApplication1
             ;
 
             var Tasks = AccessModifiers
-                .Select(AccessModifier => new CSharpAnalyzerTestWithSpecFlowAssemblies<StepDefinitionMustBePublic>()
+                .Select(AccessModifier => new CSharpAnalyzerTestWithSpecFlowAssemblies<StepDefinitionMustBePublicAnalyzer>()
                     .WithCode(CodeTemplate.Replace("[ACCESS]", AccessModifier))
                     .WithExpectedDiagnostic(ExpectedDiagnostic(14, 30, 14, 31))
                     .WithExpectedDiagnostic(ExpectedDiagnostic(18, 30, 18, 33))
@@ -189,7 +189,7 @@ namespace ConsoleApplication1
                     }
                 }";
 
-            await new CSharpAnalyzerTestWithSpecFlowAssemblies<StepDefinitionMustBePublic>()
+            await new CSharpAnalyzerTestWithSpecFlowAssemblies<StepDefinitionMustBePublicAnalyzer>()
                 .WithCode(CodeTemplate)
                 .RunAsync(CancellationToken.None) 
             ;
