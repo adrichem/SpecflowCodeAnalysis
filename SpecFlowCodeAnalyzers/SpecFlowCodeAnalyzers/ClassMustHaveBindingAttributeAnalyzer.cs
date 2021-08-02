@@ -2,19 +2,18 @@
 {
     using Adrichem.Test.SpecFlowCodeAnalyzers.Common;
     using Microsoft.CodeAnalysis;
-    using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.Diagnostics;
     using System.Collections.Immutable;
     using System.Linq;
 
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public class ClassMustBePublicAnalyzer : DiagnosticAnalyzer
+    public class ClassMustHaveBindingAttributeAnalyzer : DiagnosticAnalyzer
     {
-        private static readonly string Title = "Parent class must be public";
+        private static readonly string Title = "Class must have [Binding] attribute.";
         private static readonly string MessageFormat = "{0}";
-        private static readonly string Description = "A step definition's class must be public.";
+        private static readonly string Description = "A step definition's class must have the [Binding] attribute.";
 
-        private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(SpecFlowCodeAnalyzersDiagnosticIds.MustBePublicClass
+        private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(SpecFlowCodeAnalyzersDiagnosticIds.BindingAttributeMissing
             , Title
             , MessageFormat
             , Helpers.DiagnosticCategory
@@ -42,18 +41,21 @@
         {
             /*
              * Raise diagnostic on each of the named type's 'class' keywords when named type:
-             * - Is not public.
              * - Is a class.
-             * - contains SpecFlow step definition methods.
+             * - Contains SpecFlow step definition methods.
+             * - Does not have the [Binding] attribute
              */
-            if (c.Symbol.DeclaredAccessibility == Accessibility.Public)
-                return;
-
-            var ClassKeywords = Helpers.ClassKeywordsOf(c.Symbol as INamedTypeSymbol);
+            var nt = c.Symbol as INamedTypeSymbol;
+            var ClassKeywords = Helpers.ClassKeywordsOf(nt);
             if (ClassKeywords.IsEmpty)
                 return;
 
-            if (!Helpers.HasStepDefinitionMethods(c.Symbol as INamedTypeSymbol, c.Compilation))
+            if (!Helpers.HasStepDefinitionMethods(nt, c.Compilation))
+                return;
+            
+            var BindingAttr = c.Compilation.GetTypeByMetadataName("TechTalk.SpecFlow.BindingAttribute");
+
+            if ( nt.GetAttributes().Any(attr => SymbolEqualityComparer.Default.Equals(attr.AttributeClass, BindingAttr)))
                 return;
 
             ClassKeywords
@@ -64,5 +66,6 @@
             ;
 
         }
+
     }
 }

@@ -34,7 +34,7 @@
         private static void AnalyzeMethod(SymbolAnalysisContext c)
         {
             IMethodSymbol m = c.Symbol as IMethodSymbol;
-            if (m.DeclaredAccessibility != Accessibility.Public && m.SpecFlowAttributes(c.Compilation).Any())
+            if (m.DeclaredAccessibility != Accessibility.Public && m.SpecFlowStepDefinitionAttributes(c.Compilation).Any())
             {
                 c.ReportDiagnostic(Diagnostic.Create(Rule
                     , m.Locations.First()

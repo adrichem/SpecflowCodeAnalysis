@@ -37,7 +37,7 @@
         private void AnalyzeMethod(SymbolAnalysisContext context)
         {
             IMethodSymbol m = context.Symbol as IMethodSymbol;
-            if (m.SpecFlowAttributes(context.Compilation).Any())
+            if (m.SpecFlowStepDefinitionAttributes(context.Compilation).Any())
             {
                 m.DeclaringSyntaxReferences
                     .First()
