@@ -7,5 +7,6 @@
         public const string ForbiddenModifier = "SPECFLOW0003";
         public const string MustBePublicClass = "SPECFLOW0004";
         public const string BindingAttributeMissing = "SPECFLOW0005";
+        public const string DoNotDuplicateStepText = "SPECFLOW0006";
     }
 }
