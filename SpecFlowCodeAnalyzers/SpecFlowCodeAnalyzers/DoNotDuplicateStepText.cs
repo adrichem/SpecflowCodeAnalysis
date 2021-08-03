@@ -57,7 +57,7 @@
             {
                 c.ReportDiagnostic(Diagnostic.Create(Rule
                     ,a.ApplicationSyntaxReference.GetSyntax().GetLocation()
-                    , string.Empty))
+                    , Title))
                 ;
             }
         }

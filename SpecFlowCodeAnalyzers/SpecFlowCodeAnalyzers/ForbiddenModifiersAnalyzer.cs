@@ -55,7 +55,7 @@
                 .Where(token => token.IsKind(SyntaxKind.OutKeyword) || token.IsKind(SyntaxKind.RefKeyword))
                 .ForEach(o => c.ReportDiagnostic(Diagnostic.Create(Rule
                     , o.GetLocation()
-                    , $"modifier not allowed on step definition method"))
+                    , Title))
                 )
             ;
         }

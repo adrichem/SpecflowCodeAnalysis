@@ -9,7 +9,7 @@
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class ClassMustHaveBindingAttributeAnalyzer : DiagnosticAnalyzer
     {
-        private static readonly string Title = "Class must have [Binding] attribute.";
+        private static readonly string Title = "Class must have [Binding] attribute";
         private static readonly string MessageFormat = "{0}";
         private static readonly string Description = "A step definition's class must have the [Binding] attribute.";
 
@@ -61,7 +61,7 @@
             ClassKeywords
                 .ForEach(classKeyword => c.ReportDiagnostic(Diagnostic.Create(Rule
                        , classKeyword.GetLocation()
-                       , $"Classes with step definitions must be public."))
+                       , Title))
                 )
             ;
 

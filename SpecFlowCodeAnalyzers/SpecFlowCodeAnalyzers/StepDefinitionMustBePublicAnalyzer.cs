@@ -38,7 +38,7 @@
             {
                 c.ReportDiagnostic(Diagnostic.Create(Rule
                     , m.Locations.First()
-                    , $"Must be public: {m.Name}")
+                    , Title)
                 );
             }
         }

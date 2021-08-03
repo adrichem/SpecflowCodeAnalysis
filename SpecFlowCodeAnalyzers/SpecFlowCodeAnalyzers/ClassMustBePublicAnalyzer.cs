@@ -2,10 +2,8 @@
 {
     using Adrichem.Test.SpecFlowCodeAnalyzers.Common;
     using Microsoft.CodeAnalysis;
-    using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.Diagnostics;
     using System.Collections.Immutable;
-    using System.Linq;
 
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class ClassMustBePublicAnalyzer : DiagnosticAnalyzer
