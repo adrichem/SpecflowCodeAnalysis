@@ -80,7 +80,7 @@
             , IEnumerable<SyntaxToken> tokensToReplace)
         {
             //The public keyword replaces 1 or more access modifiers
-            //Ensure it has leading trivia if first replaced modifier
+            //Ensure it has leading trivia of first replaced modifier
             //and trailing trivia of last replaced modifier
             SyntaxToken publicToken = SyntaxFactory.Token(SyntaxFactory.TriviaList(tokensToReplace.First().LeadingTrivia)
                    , SyntaxKind.PublicKeyword
@@ -120,40 +120,50 @@
             , ClassDeclarationSyntax classDecl
             , CancellationToken cancellationToken)
         {
-            //insert public modifier behind the static keyword (if any) 
-            int index = classDecl
-                .Modifiers
-                .Where(m => m.IsKind(SyntaxKind.StaticKeyword))
-                .Select(staticKeyWord => classDecl.Modifiers.IndexOf(staticKeyWord) + 1)
-                .FirstOrDefault()
-            ;
 
-            SyntaxToken publicToken;
+            ClassDeclarationSyntax newClassDecl;
 
-            if (index != 0 )
+            if (classDecl.Modifiers.Any())
             {
-                //the new keyword is inserted directly after the static keyword
-                //there's no need to give it leading/trailing whitespace
-                publicToken = SyntaxFactory.Token(SyntaxFactory.TriviaList()
-                     , SyntaxKind.PublicKeyword
-                     , SyntaxFactory.TriviaList()
+                //insert a 'public' token as the 1st modifier
+                //move leading trivia of current 1st modifier to it.
+                var TokenToInsertBefore = classDecl.Modifiers.First();
+                var NewTokenToInsertBefore = TokenToInsertBefore
+                    .WithoutTrivia()
+                    .WithTrailingTrivia(TokenToInsertBefore.TrailingTrivia)
+                ;
+
+                SyntaxToken publicToken = SyntaxFactory.Token(TokenToInsertBefore.LeadingTrivia
+                    , SyntaxKind.PublicKeyword
+                    , SyntaxFactory.TriviaList(SyntaxFactory.SyntaxTrivia(SyntaxKind.WhitespaceTrivia, " "))
                 );
+
+                var newModifiers = classDecl.Modifiers
+                    .Replace(TokenToInsertBefore, NewTokenToInsertBefore)
+                    .Insert(0, publicToken)
+                ;
+
+                newClassDecl = classDecl.WithModifiers(newModifiers);
             }
             else
             {
-                //the public keyword is inserted at beginning of the class declaration
-                //We need to ensure its leading trivia is taken from the 1st token of the class declaration
-                publicToken = SyntaxFactory.Token(classDecl.ChildTokens().First().LeadingTrivia
-                     , SyntaxKind.PublicKeyword
-                     , SyntaxFactory.TriviaList(SyntaxFactory.ElasticMarker)
-                );
-            }
-           
+                //Insert a 'public' token as the only modifier
+                //The leading trivia of 'class' token needs to move to the new 'public' token
+                var classToken = classDecl.ChildTokens().Single(t => t.IsKind(SyntaxKind.ClassKeyword));
+                var newClassToken = classToken.WithoutTrivia().WithTrailingTrivia(classToken.TrailingTrivia);
 
-            var newClassDecl = classDecl
-                .WithModifiers(new SyntaxTokenList(classDecl
-                    .Modifiers
-                    .Insert(index, publicToken)));
+                SyntaxToken publicToken = SyntaxFactory.Token(classToken.LeadingTrivia
+                    , SyntaxKind.PublicKeyword
+                    , SyntaxFactory.TriviaList(SyntaxFactory.SyntaxTrivia(SyntaxKind.WhitespaceTrivia, " "))
+                );
+
+                newClassDecl = classDecl
+                    .WithKeyword(newClassToken)
+                    .WithModifiers(classDecl.Modifiers.Insert(0, publicToken))
+                ;
+            }
+
+
 
             SyntaxNode oldRoot = await document
                 .GetSyntaxRootAsync(cancellationToken)
