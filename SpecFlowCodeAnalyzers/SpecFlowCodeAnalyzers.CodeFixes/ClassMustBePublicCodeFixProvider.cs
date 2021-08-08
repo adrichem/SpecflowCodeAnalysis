@@ -127,8 +127,8 @@
             {
                 //insert a 'public' token as the 1st modifier
                 //move leading trivia of current 1st modifier to it.
-                var TokenToInsertBefore = classDecl.Modifiers.First();
-                var NewTokenToInsertBefore = TokenToInsertBefore
+                SyntaxToken TokenToInsertBefore = classDecl.Modifiers.First();
+                SyntaxToken NewTokenToInsertBefore = TokenToInsertBefore
                     .WithoutTrivia()
                     .WithTrailingTrivia(TokenToInsertBefore.TrailingTrivia)
                 ;
@@ -138,19 +138,17 @@
                     , SyntaxFactory.TriviaList(SyntaxFactory.SyntaxTrivia(SyntaxKind.WhitespaceTrivia, " "))
                 );
 
-                var newModifiers = classDecl.Modifiers
+                newClassDecl = classDecl.WithModifiers(classDecl
+                    .Modifiers
                     .Replace(TokenToInsertBefore, NewTokenToInsertBefore)
                     .Insert(0, publicToken)
-                ;
-
-                newClassDecl = classDecl.WithModifiers(newModifiers);
+                );
             }
             else
             {
                 //Insert a 'public' token as the only modifier
                 //The leading trivia of 'class' token needs to move to the new 'public' token
-                var classToken = classDecl.ChildTokens().Single(t => t.IsKind(SyntaxKind.ClassKeyword));
-                var newClassToken = classToken.WithoutTrivia().WithTrailingTrivia(classToken.TrailingTrivia);
+                SyntaxToken classToken = classDecl.ChildTokens().Single(t => t.IsKind(SyntaxKind.ClassKeyword));
 
                 SyntaxToken publicToken = SyntaxFactory.Token(classToken.LeadingTrivia
                     , SyntaxKind.PublicKeyword
@@ -158,7 +156,7 @@
                 );
 
                 newClassDecl = classDecl
-                    .WithKeyword(newClassToken)
+                    .WithKeyword(classToken.WithoutTrivia().WithTrailingTrivia(classToken.TrailingTrivia))
                     .WithModifiers(classDecl.Modifiers.Insert(0, publicToken))
                 ;
             }
