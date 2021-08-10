@@ -12,23 +12,26 @@
 
 
     /// <summary>
-    /// A unit test for the <see cref="ClassMustBePublicCodeFixProvider"/>  
+    /// A unit test for 
+    /// <see cref="ClassMustBePublicAnalyzer"/> and
+    /// <see cref="ClassMustBePublicCodeFixProvider"/>  
     ///
     /// We test the following situations regarding access modifiers.
-    /// <list type="number">
-    ///    <item>none</item>
-    ///    <item><see langword="private"/></item>
-    ///    <item><see langword="protected"/></item>
-    ///    <item><see langword="internal"/></item>
-    ///    <item><see langword="protected"/> <see langword="internal"/></item>
-    ///    <item><see langword="protected"/> <see langword="private"/></item>
-    ///    <item>class is <see langword="static"/></item>
-    ///    <item>class is <see langword="partial"/> but has only 1 declaration</item>
-    ///    <item>class is <see langword="partial"/> and has multiple declarations</item>
+    /// <list type="table">
+    ///    <item><term>0</term><term><see langword="public"/></term></item>
+    ///    <item><term>1</term><term>none</term></item>
+    ///    <item><term>2</term><term><see langword="private"/></term></item>
+    ///    <item><term>3</term><term><see langword="protected"/></term></item>
+    ///    <item><term>4</term><term><see langword="internal"/></term></item>
+    ///    <item><term>5</term><term><see langword="protected"/> <see langword="internal"/></term></item>
+    ///    <item><term>6</term><term><see langword="protected"/> <see langword="private"/></term></item>
+    ///    <item><term>7</term><term><see langword="static"/></term></item>
+    ///    <item><term>8</term><term>class is <see langword="partial"/> but has only 1 declaration</term></item>
+    ///    <item><term>9</term><term>class is <see langword="partial"/> and has multiple declarations</term></item>
+    ///    <item><term>10</term><term>class is a nested class</term></item>
     /// </list>
     /// 
-    /// For trivia we test the following situations 
-    /// 
+    /// For trivia we test the following situations:
     /// <list type="table">
     ///     <listheader>
     ///         <term>Situation#</term>
@@ -111,7 +114,7 @@
     /// </list>
     /// </summary>
     [TestClass]
-    public class ClassMustBePublicCodeFixUnitTest
+    public class ClassMustBePublicUnitTest
     {
         private readonly Func<int, int, int, int, DiagnosticResult> ExpectedDiagnostic = (x1, y1, x2, y2) =>
                new DiagnosticResult(SpecFlowCodeAnalyzersDiagnosticIds.MustBePublicClass
@@ -121,7 +124,37 @@
         ;
 
         [TestMethod]
-        public async Task CodeFixSituation01()
+        public async Task Modifiers00()
+        {
+            string CodeTemplate = @"using TechTalk.SpecFlow;
+namespace a
+{
+    [Binding]
+    public class MyTestCode
+    {   
+        [Given,When,Then,StepDefinition]
+        public void TestMethod() {  }
+    }
+}";
+            string ExpectedResult = @"using TechTalk.SpecFlow;
+namespace a
+{
+    [Binding]
+    public class MyTestCode
+    {   
+        [Given,When,Then,StepDefinition]
+        public void TestMethod() {  }
+    }
+}";
+            await new CSharpCodeFixTestWithSpecFlowAssemblies<ClassMustBePublicAnalyzer, ClassMustBePublicCodeFixProvider>()
+                .WithCode(CodeTemplate)
+                .WithFixCode(ExpectedResult)
+                .RunAsync()
+            ;
+        }
+
+        [TestMethod]
+        public async Task Modifiers01()
         {
             string CodeTemplate = @"using TechTalk.SpecFlow;
 namespace a
@@ -152,7 +185,7 @@ namespace a
         }
 
         [TestMethod]
-        public async Task CodeFixSituation02()
+        public async Task Modifiers02()
         {
             string CodeTemplate = @"using TechTalk.SpecFlow;
 namespace a
@@ -189,7 +222,7 @@ namespace a
         }
         
         [TestMethod]
-        public async Task CodeFixSituation03()
+        public async Task Modifiers03()
         {
             string CodeTemplate = @"using TechTalk.SpecFlow;
 namespace a
@@ -226,7 +259,7 @@ namespace a
         }
 
         [TestMethod]
-        public async Task CodeFixSituation04()
+        public async Task Modifiers04()
         {
             string CodeTemplate = @"using TechTalk.SpecFlow;
 namespace a
@@ -263,7 +296,7 @@ namespace a
         }
 
         [TestMethod]
-        public async Task CodeFixSituation05()
+        public async Task Modifiers05()
         {
             string CodeTemplate = @"using TechTalk.SpecFlow;
 namespace a
@@ -300,7 +333,7 @@ namespace a
         }
 
         [TestMethod]
-        public async Task CodeFixSituation06()
+        public async Task Modifiers06()
         {
             string CodeTemplate = @"using TechTalk.SpecFlow;
 namespace a
@@ -337,7 +370,7 @@ namespace a
         }
 
         [TestMethod]
-        public async Task CodeFixSituation07()
+        public async Task Modifiers07()
         {
             string CodeTemplate = @"using TechTalk.SpecFlow;
 namespace a
@@ -374,7 +407,7 @@ namespace a
         }
 
         [TestMethod]
-        public async Task CodeFixSituation08()
+        public async Task Modifiers08()
         {
             string CodeTemplate = @"using TechTalk.SpecFlow;
 namespace a
@@ -411,7 +444,7 @@ namespace a
         }
 
         [TestMethod]
-        public async Task CodeFixSituation09()
+        public async Task Modifiers09()
         {
             string CodeTemplate = @"using TechTalk.SpecFlow;
 namespace a
@@ -461,7 +494,51 @@ namespace a
         }
 
         [TestMethod]
-        public async Task TriviaSituation01()
+        public async Task Modifiers10()
+        {
+            string CodeTemplate = @"using TechTalk.SpecFlow;
+namespace ConsoleApplication1
+{
+    class outer
+    {
+        [Binding]
+        ///
+        ///
+        ///
+        private class inner
+        {   
+            [Given, When, Then(""here is my regex""),StepDefinition]
+            public void Method1() {}
+        }
+    }
+}";
+            string ExpectedResult = @"using TechTalk.SpecFlow;
+namespace ConsoleApplication1
+{
+    class outer
+    {
+        [Binding]
+        ///
+        ///
+        ///
+        public class inner
+        {   
+            [Given, When, Then(""here is my regex""),StepDefinition]
+            public void Method1() {}
+        }
+    }
+}";
+            await new CSharpCodeFixTestWithSpecFlowAssemblies<ClassMustBePublicAnalyzer, ClassMustBePublicCodeFixProvider>()
+                .WithCode(CodeTemplate)
+                .WithExpectedDiagnostic(ExpectedDiagnostic(10, 17, 10, 22))
+                .WithFixCode(ExpectedResult)
+                .RunAsync()
+            ;
+        }
+
+
+        [TestMethod]
+        public async Task Trivia01()
         {
             string CodeTemplate = @"using TechTalk.SpecFlow;
 namespace a
@@ -492,7 +569,7 @@ public class MyTestCode
         }
 
         [TestMethod]
-        public async Task TriviaSituation02()
+        public async Task Trivia02()
         {
             string CodeTemplate = @"using TechTalk.SpecFlow;
 namespace a
@@ -533,7 +610,7 @@ namespace a
         }
 
         [TestMethod]
-        public async Task TriviaSituation05()
+        public async Task Trivia05()
         {
             string CodeTemplate = @"using TechTalk.SpecFlow;
 namespace a
@@ -570,7 +647,7 @@ namespace a
         }
 
         [TestMethod]
-        public async Task TriviaSituation06()
+        public async Task Trivia06()
         {
             string CodeTemplate = @"using TechTalk.SpecFlow;
 namespace a
@@ -613,7 +690,7 @@ namespace a
         }
 
         [TestMethod]
-        public async Task TriviaSituation07()
+        public async Task Trivia07()
         {
             string CodeTemplate = @"using TechTalk.SpecFlow;
 namespace a
@@ -650,7 +727,7 @@ namespace a
         }
 
         [TestMethod]
-        public async Task TriviaSituation08()
+        public async Task Trivia08()
         {
             string CodeTemplate = @"using TechTalk.SpecFlow;
 namespace a
@@ -693,7 +770,7 @@ namespace a
         }
 
         [TestMethod]
-        public async Task TriviaSituation09()
+        public async Task Trivia09()
         {
             string CodeTemplate = @"using TechTalk.SpecFlow;
 namespace a
@@ -722,7 +799,7 @@ namespace a
         }
 
         [TestMethod]
-        public async Task TriviaSituation10()
+        public async Task Trivia10()
         {
             string CodeTemplate = @"using TechTalk.SpecFlow;
 namespace a
@@ -757,7 +834,7 @@ namespace a
         }
 
         [TestMethod]
-        public async Task TriviaSituation11()
+        public async Task Trivia11()
         {
             string CodeTemplate = @"using TechTalk.SpecFlow;
 namespace a
@@ -792,7 +869,7 @@ namespace a
         }
 
         [TestMethod]
-        public async Task TriviaSituation12()
+        public async Task Trivia12()
         {
             string CodeTemplate = @"using TechTalk.SpecFlow;
 namespace a
@@ -831,42 +908,5 @@ namespace a
                 .RunAsync()
             ;
         }
-
-        [TestMethod]
-        public async Task TriviaSituationD()
-        {
-            string CodeTemplate = @"using TechTalk.SpecFlow;
-namespace a
-{
-        ///<summary>
-        ///This is a comment
-        ///</summary>
-        class /* foo bar */ MyTestCode
-        {   
-            [Given,When,Then,StepDefinition]
-            public static void TestMethod() {  }
-        }
-}";
-            string ExpectedResult = @"using TechTalk.SpecFlow;
-namespace a
-{
-        ///<summary>
-        ///This is a comment
-        ///</summary>
-        public class /* foo bar */ MyTestCode
-        {   
-            [Given,When,Then,StepDefinition]
-            public static void TestMethod() {  }
-        }
-}";
-            await new CSharpCodeFixTestWithSpecFlowAssemblies<ClassMustBePublicAnalyzer, ClassMustBePublicCodeFixProvider>()
-                .WithCode(CodeTemplate)
-                .WithExpectedDiagnostic(ExpectedDiagnostic(7, 9, 7, 14))
-                .WithFixCode(ExpectedResult)
-                .RunAsync()
-            ;
-        }
-
-
     }
 }

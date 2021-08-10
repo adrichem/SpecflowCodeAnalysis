@@ -1,12 +1,12 @@
 ﻿namespace SpecFlowCodeAnalyzers.CodeFixes
 {
+    using Adrichem.Test.SpecFlowCodeAnalyzers.CodeFixes.Helpers;
     using Adrichem.Test.SpecFlowCodeAnalyzers.Common;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CodeActions;
     using Microsoft.CodeAnalysis.CodeFixes;
     using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
-    using System;
     using System.Collections.Generic;
     using System.Collections.Immutable;
     using System.Composition;
@@ -42,107 +42,35 @@
                 diagnostic);
         }
 
-        private readonly Func<SyntaxToken, bool> IsReplaceableAccessModifier = (m) => m.IsKind(SyntaxKind.ProtectedKeyword)
-                    || m.IsKind(SyntaxKind.PrivateKeyword)
-                    || m.IsKind(SyntaxKind.InternalKeyword)
-        ;
 
+        private readonly ImmutableList<SyntaxKind> ReplaceAbleAccessModifiers = new List<SyntaxKind>
+        {
+            SyntaxKind.InternalKeyword,
+            SyntaxKind.PrivateKeyword,
+            SyntaxKind.ProtectedKeyword
+        }
+        .ToImmutableList();
 
         private async Task<Document> MakePublicAsync(Document document
             , ClassDeclarationSyntax classDecl
             , CancellationToken cancellationToken)
         {
-
-            var accessModifiers = classDecl
-                .Modifiers
-                .Where(m => IsReplaceableAccessModifier(m))
-            ;
-
-            if (accessModifiers.Any())
-            {
-                return await ReplaceAccessModifiers(document
-                    , classDecl
-                    , cancellationToken
-                    , accessModifiers)
-                ;
-            }
-
-            return await InsertPublicModifier(document
-                , classDecl
-                , cancellationToken)
-            ;
-        }
-
-
-        private async Task<Document> ReplaceAccessModifiers(Document document
-            , ClassDeclarationSyntax classDecl
-            , CancellationToken cancellationToken
-            , IEnumerable<SyntaxToken> tokensToReplace)
-        {
-            //The public keyword replaces 1 or more access modifiers
-            //Ensure it has leading trivia of first replaced modifier
-            //and trailing trivia of last replaced modifier
-            SyntaxToken publicToken = SyntaxFactory.Token(SyntaxFactory.TriviaList(tokensToReplace.First().LeadingTrivia)
-                   , SyntaxKind.PublicKeyword
-                   , SyntaxFactory.TriviaList(tokensToReplace.Last().TrailingTrivia)
-            );
-
-            //Get the index of the 1st removeable token
-            int index = classDecl
-                .Modifiers
-                .Where(m => IsReplaceableAccessModifier(m))
-                .Select(m => classDecl.Modifiers.IndexOf(m))
-                .OrderBy(i => i)
-                .First()
-            ;
-
-            var newModifiers = classDecl
-                .Modifiers
-                .Replace(tokensToReplace.First(), publicToken)
-            ;
-
-            //now remove each remaining access modifiers
-            foreach (var tokenToRemove in tokensToReplace.Skip(1))
-            {
-                newModifiers = newModifiers.Remove(newModifiers.Single(m => m.Kind() == tokenToRemove.Kind()));
-            }
-
-            var newClassDecl = classDecl.WithModifiers(new SyntaxTokenList(newModifiers));
-
-            SyntaxNode oldRoot = await document
-                .GetSyntaxRootAsync(cancellationToken)
-                .ConfigureAwait(false);
-
-            return document.WithSyntaxRoot(oldRoot.ReplaceNode(classDecl, newClassDecl));
-        }
-
-        private async Task<Document> InsertPublicModifier(Document document
-            , ClassDeclarationSyntax classDecl
-            , CancellationToken cancellationToken)
-        {
-
             ClassDeclarationSyntax newClassDecl;
+            bool hasReplaceableAccessModifiers = classDecl
+                .Modifiers
+                .Where(m => ReplaceAbleAccessModifiers.Any(r => r == m.Kind()))
+                .Any()
+            ;
 
-            if (classDecl.Modifiers.Any())
+            if (hasReplaceableAccessModifiers)
             {
-                //insert a 'public' token as the 1st modifier
-                //move leading trivia of current 1st modifier to it.
-                SyntaxToken TokenToInsertBefore = classDecl.Modifiers.First();
-                SyntaxToken NewTokenToInsertBefore = TokenToInsertBefore
-                    .WithoutTrivia()
-                    .WithTrailingTrivia(TokenToInsertBefore.TrailingTrivia)
-                ;
-
-                SyntaxToken publicToken = SyntaxFactory.Token(TokenToInsertBefore.LeadingTrivia
-                    , SyntaxKind.PublicKeyword
-                    , SyntaxFactory.TriviaList(SyntaxFactory.SyntaxTrivia(SyntaxKind.WhitespaceTrivia, " "))
-                );
-
-                newClassDecl = classDecl.WithModifiers(classDecl
-                    .Modifiers
-                    .Replace(TokenToInsertBefore, NewTokenToInsertBefore)
-                    .Insert(0, publicToken)
-                );
+                newClassDecl = ReplaceAccessModifiersHelper.ReplaceModifiers(classDecl
+                     , SyntaxKind.PublicKeyword
+                     , ReplaceAbleAccessModifiers);
+            }
+            else if (classDecl.Modifiers.Any())
+            {
+                newClassDecl = InsertPublicModifierHelper.InsertPublicModifier(classDecl) as ClassDeclarationSyntax;
             }
             else
             {
@@ -160,16 +88,9 @@
                     .WithModifiers(classDecl.Modifiers.Insert(0, publicToken))
                 ;
             }
-
-
-
-            SyntaxNode oldRoot = await document
+            return document.WithSyntaxRoot((await document
                 .GetSyntaxRootAsync(cancellationToken)
-                .ConfigureAwait(false)
-            ;
-
-            return document.WithSyntaxRoot(oldRoot.ReplaceNode(classDecl, newClassDecl));
+                .ConfigureAwait(false)).ReplaceNode(classDecl, newClassDecl));
         }
-
     }
 }

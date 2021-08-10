@@ -1,5 +1,6 @@
 ﻿namespace SpecFlowCodeAnalyzers.CodeFixes
 {
+    using Adrichem.Test.SpecFlowCodeAnalyzers.CodeFixes.Helpers;
     using Adrichem.Test.SpecFlowCodeAnalyzers.Common;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CodeActions;
@@ -23,7 +24,6 @@
         }
 
         public sealed override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
-        
         public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
         {
             var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
@@ -44,32 +44,53 @@
                 diagnostic);
         }
 
+        private readonly ImmutableList<SyntaxKind> ReplaceAbleAccessModifiers = new List<SyntaxKind>
+        {
+            SyntaxKind.InternalKeyword,
+            SyntaxKind.PrivateKeyword,
+            SyntaxKind.ProtectedKeyword
+        }.ToImmutableList();
+
         private async Task<Document> MakePublicAsync(Document document
             , MethodDeclarationSyntax methodDecl
             , CancellationToken cancellationToken)
         {
-            SyntaxTriviaList leadingTrivia = methodDecl
-                .ReturnType
-                .GetLeadingTrivia();
-
-            SyntaxToken publicToken = SyntaxFactory.Token(leadingTrivia
-                , SyntaxKind.PublicKeyword
-                , SyntaxFactory.TriviaList(SyntaxFactory.ElasticMarker));
-
-            var newModifiers = methodDecl
+            MethodDeclarationSyntax newMethodDecl;
+            bool hasReplaceableAccessModifiers = methodDecl
                 .Modifiers
-                .Where(m => !m.IsKind(SyntaxKind.PrivateKeyword))
-                .Where(m => !m.IsKind(SyntaxKind.ProtectedKeyword))
-                .Where(m => !m.IsKind(SyntaxKind.InternalKeyword))
-                .Concat(new List<SyntaxToken> { publicToken })
+                .Where(m => ReplaceAbleAccessModifiers.Any(r => r == m.Kind()))
+                .Any()
             ;
-            MethodDeclarationSyntax newMethodDeclaration = methodDecl.WithModifiers(new SyntaxTokenList(newModifiers));
 
-            SyntaxNode oldRoot = await document
+            if (hasReplaceableAccessModifiers)
+            {
+                newMethodDecl = ReplaceAccessModifiersHelper.ReplaceModifiers(methodDecl
+                    , SyntaxKind.PublicKeyword
+                    , ReplaceAbleAccessModifiers);
+            }
+            else if (methodDecl.Modifiers.Any())
+            {
+                newMethodDecl = InsertPublicModifierHelper.InsertPublicModifier(methodDecl) as MethodDeclarationSyntax;
+            }
+            else
+            {
+                //Insert a 'public' token as the only modifier
+                //The leading trivia of return type needs to move to the new 'public' token
+                SyntaxToken publicToken = SyntaxFactory.Token(methodDecl.ReturnType.GetLeadingTrivia()
+                    , SyntaxKind.PublicKeyword
+                    , SyntaxFactory.TriviaList(SyntaxFactory.SyntaxTrivia(SyntaxKind.WhitespaceTrivia, " "))
+                );
+
+                newMethodDecl = methodDecl
+                    .WithReturnType(methodDecl.ReturnType.WithoutTrivia().WithTrailingTrivia(methodDecl.ReturnType.GetTrailingTrivia()))
+                    .WithModifiers(methodDecl.Modifiers.Insert(0, publicToken))
+                ;
+            }
+
+            return document.WithSyntaxRoot((await document
                 .GetSyntaxRootAsync(cancellationToken)
-                .ConfigureAwait(false);
-
-            return document.WithSyntaxRoot(oldRoot.ReplaceNode(methodDecl, newMethodDeclaration));
+                .ConfigureAwait(false)).ReplaceNode(methodDecl, newMethodDecl));
         }
+     
     }
 }
