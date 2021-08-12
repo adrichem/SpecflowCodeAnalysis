@@ -58,10 +58,11 @@
 
             ParameterSyntax newParameterDeclaration = param.WithModifiers(new SyntaxTokenList(newModifiers));
 
-            SyntaxNode oldRoot = await document
+             return document.WithSyntaxRoot((await document
                 .GetSyntaxRootAsync(cancellationToken)
-                .ConfigureAwait(false);
-            return document.WithSyntaxRoot(oldRoot.ReplaceNode(param, newParameterDeclaration));
+                .ConfigureAwait(false))
+                .ReplaceNode(param, newParameterDeclaration)
+             );
         }
     }
 }
