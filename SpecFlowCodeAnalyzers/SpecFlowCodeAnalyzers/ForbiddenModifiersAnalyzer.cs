@@ -31,7 +31,13 @@
         {
             context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
             context.EnableConcurrentExecution();
-            context.RegisterSymbolAction(AnalyzeMethod, SymbolKind.Method);
+            context.RegisterCompilationStartAction(x =>
+            {
+                if (x.Compilation.SpecFlowIsReferenced())
+                {
+                    x.RegisterSymbolAction(AnalyzeMethod, SymbolKind.Method);
+                }
+            });
         }
 
         private void AnalyzeMethod(SymbolAnalysisContext context)
