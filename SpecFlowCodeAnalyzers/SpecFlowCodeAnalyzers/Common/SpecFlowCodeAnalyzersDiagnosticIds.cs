@@ -8,5 +8,7 @@
         public const string MustBePublicClass = "SPECFLOW0004";
         public const string BindingAttributeMissing = "SPECFLOW0005";
         public const string DoNotDuplicateStepText = "SPECFLOW0006";
+        public const string RegExContainsBannedWord = "SPECFLOW0007";
+        public const string RegExContainsBannedWordInvalidFileFormat = "SPECFLOW0008";
     }
 }
