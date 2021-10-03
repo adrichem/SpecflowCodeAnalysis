@@ -15,8 +15,26 @@ Install the NuGet package into your project. Visual Studio / VS Code will start 
 |SPECFLOW0004| The step definition's class is not `public`.|
 |SPECFLOW0005| The step definition's class does not have the `[Binding]` attribute.|
 |SPECFLOW0006| The step definition has attributes with duplicated step text.|
+|SPECFLOW0007|  The string of the `Given()/When()/Then()/StepDefinition` attribute contains words banned by `BannedStepTextPatterns.xml`.|
+|SPECFLOW0008| `BannedStepTextPatterns.xml` has an error in it.|
 
-## BindingAnalyzer
+### Configuring banned words
+To check your reg-exes for invalid words:
+1. Add a file named `BannedStepTextPatterns.xml` to your project.
+2. In the solution explorer, set the build action to 'AdditionalFiles' on `BannedStepTextPatterns.xml`
+3. Put content like this into `BannedStepTextPatterns.xml`: 
+```xml
+<?xml version="1.0" encoding="utf-16"?>
+<banlist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+         xmlns="dec2ed27-578d-445b-8bfa-43f4fbe150b6">
+  <items>
+    <item phrase="Hello" severity="Error" />
+    <item phrase="World" severity="Warning" ignoreCase="true" message="try to use 'everyone' instead of 'World'" />
+  </items>
+</banlist>
+```
+# BindingAnalyzer
 
 Finds step definitions and Given/When/Then attributes that are never used by any of the .feature files. Usage:
 
