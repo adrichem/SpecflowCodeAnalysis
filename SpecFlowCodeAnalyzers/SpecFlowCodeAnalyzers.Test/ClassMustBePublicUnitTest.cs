@@ -24,7 +24,6 @@
     ///    <item><term>3</term><term><see langword="protected"/></term></item>
     ///    <item><term>4</term><term><see langword="internal"/></term></item>
     ///    <item><term>5</term><term><see langword="protected"/> <see langword="internal"/></term></item>
-    ///    <item><term>6</term><term><see langword="protected"/> <see langword="private"/></term></item>
     ///    <item><term>7</term><term><see langword="static"/></term></item>
     ///    <item><term>8</term><term>class is <see langword="partial"/> but has only 1 declaration</term></item>
     ///    <item><term>9</term><term>class is <see langword="partial"/> and has multiple declarations</term></item>
@@ -341,43 +340,6 @@ namespace a
     class foo
     {
         [Binding]
-        protected private class MyTestCode
-        {   
-            [Given,When,Then,StepDefinition]
-            public void TestMethod() {  }
-        }
-    }
-}";
-            string ExpectedResult = @"using TechTalk.SpecFlow;
-namespace a
-{
-    class foo
-    {
-        [Binding]
-        public class MyTestCode
-        {   
-            [Given,When,Then,StepDefinition]
-            public void TestMethod() {  }
-        }
-    }
-}";
-            await new CSharpCodeFixTestWithSpecFlowAssemblies<ClassMustBePublicAnalyzer, ClassMustBePublicCodeFixProvider>()
-                .WithCode(CodeTemplate)
-                .WithExpectedDiagnostic(ExpectedDiagnostic(7, 27, 7, 32))
-                .WithFixCode(ExpectedResult)
-                .RunAsync()
-            ;
-        }
-
-        [TestMethod]
-        public async Task Modifiers07()
-        {
-            string CodeTemplate = @"using TechTalk.SpecFlow;
-namespace a
-{
-    class foo
-    {
-        [Binding]
         static protected internal class MyTestCode
         {   
             [Given,When,Then,StepDefinition]
@@ -407,7 +369,7 @@ namespace a
         }
 
         [TestMethod]
-        public async Task Modifiers08()
+        public async Task Modifiers07()
         {
             string CodeTemplate = @"using TechTalk.SpecFlow;
 namespace a
@@ -444,7 +406,7 @@ namespace a
         }
 
         [TestMethod]
-        public async Task Modifiers09()
+        public async Task Modifiers08()
         {
             string CodeTemplate = @"using TechTalk.SpecFlow;
 namespace a
@@ -494,7 +456,7 @@ namespace a
         }
 
         [TestMethod]
-        public async Task Modifiers10()
+        public async Task Modifiers09()
         {
             string CodeTemplate = @"using TechTalk.SpecFlow;
 namespace ConsoleApplication1

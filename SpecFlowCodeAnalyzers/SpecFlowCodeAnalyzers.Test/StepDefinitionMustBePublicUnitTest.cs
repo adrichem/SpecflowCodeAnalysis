@@ -23,9 +23,7 @@
     ///    <item><term>2</term><term><see langword="private"/></term></item>
     ///    <item><term>3</term><term><see langword="protected"/></term></item>
     ///    <item><term>4</term><term><see langword="internal"/></term></item>
-    ///    <item><term>5</term><term><see langword="protected"/> <see langword="private"/></term></item>
     ///    <item><term>6</term><term><see langword="static"/></term></item>
-    ///    <item><term>7</term><term><see langword="partial"/></term></item>
     /// </list>
     /// 
     /// For trivia we test the following situations:
@@ -86,13 +84,13 @@
     ///         <term>YES</term>
     ///    </item>  
     ///    <item>
-    ///         <term>9</term>
+    ///         <term>9 (n/a for c# 7)</term>
     ///         <term>MORE</term>
     ///         <term>NO</term>
     ///         <term>NO</term>
     ///    </item>  
     ///    <item>
-    ///         <term>10</term>
+    ///         <term>10 (n/a for c# 7)</term>
     ///         <term>MORE</term>
     ///         <term>NO</term>
     ///         <term>YES</term>
@@ -279,39 +277,9 @@ namespace a
             ;
         }
 
-        [TestMethod]
-        public async Task Modifiers05()
-        {
-            string CodeTemplate = @"using TechTalk.SpecFlow;
-namespace a
-{
-    [Binding]
-    public class MyTestCode
-    {   
-        [Given,When,Then,StepDefinition]
-        protected private void TestMethod() {  }
-    }
-}";
-            string ExpectedResult = @"using TechTalk.SpecFlow;
-namespace a
-{
-    [Binding]
-    public class MyTestCode
-    {   
-        [Given,When,Then,StepDefinition]
-        public void TestMethod() {  }
-    }
-}";
-            await new CSharpCodeFixTestWithSpecFlowAssemblies<StepDefinitionMustBePublicAnalyzer, StepDefinitionMustBePublicCodeFixProvider>()
-                .WithCode(CodeTemplate)
-                .WithExpectedDiagnostic(ExpectedDiagnostic(8, 32, 8, 42))
-                .WithFixCode(ExpectedResult)
-                .RunAsync()
-            ;
-        }
 
         [TestMethod]
-        public async Task Modifiers06()
+        public async Task Modifiers05()
         {
             string CodeTemplate = @"using TechTalk.SpecFlow;
 namespace a
@@ -336,48 +304,6 @@ namespace a
             await new CSharpCodeFixTestWithSpecFlowAssemblies<StepDefinitionMustBePublicAnalyzer, StepDefinitionMustBePublicCodeFixProvider>()
                 .WithCode(CodeTemplate)
                 .WithExpectedDiagnostic(ExpectedDiagnostic(8, 21, 8, 31))
-                .WithFixCode(ExpectedResult)
-                .RunAsync()
-            ;
-        }
-
-        [TestMethod]
-        public async Task Modifiers07()
-        {
-            string CodeTemplate = @"using TechTalk.SpecFlow;
-namespace a
-{
-    [Binding]
-    public partial class MyTestCode
-    {   
-        [Given,When,Then,StepDefinition]
-        partial void TestMethod();
-    }
-
-    public partial class MyTestCode
-    {   
-        partial void TestMethod() { }
-    }
-}";
-            string ExpectedResult = @"using TechTalk.SpecFlow;
-namespace a
-{
-    [Binding]
-    public partial class MyTestCode
-    {   
-        [Given,When,Then,StepDefinition]
-        public partial void TestMethod();
-    }
-
-    public partial class MyTestCode
-    {   
-        public partial void TestMethod() { }
-    }
-}";
-            await new CSharpCodeFixTestWithSpecFlowAssemblies<StepDefinitionMustBePublicAnalyzer, StepDefinitionMustBePublicCodeFixProvider>()
-                .WithCode(CodeTemplate)
-                .WithExpectedDiagnostic(ExpectedDiagnostic(8, 22, 8, 32))
-                .WithExpectedDiagnostic(ExpectedDiagnostic(13, 22, 13, 32))
                 .WithFixCode(ExpectedResult)
                 .RunAsync()
             ;
@@ -580,84 +506,6 @@ namespace a
             await new CSharpCodeFixTestWithSpecFlowAssemblies<StepDefinitionMustBePublicAnalyzer, StepDefinitionMustBePublicCodeFixProvider>()
                 .WithCode(CodeTemplate)
                 .WithExpectedDiagnostic(ExpectedDiagnostic(11, 46, 11, 56))
-                .WithFixCode(ExpectedResult)
-                .RunAsync()
-            ;
-        }
-
-        [TestMethod]
-        public async Task Trivia09()
-        {
-            string CodeTemplate = @"using TechTalk.SpecFlow;
-namespace a
-{
-    [Binding]
-    public static partial class MyTestCode
-    {   
-        [Given,When,Then,StepDefinition]
-        static partial void /* trailing trivia */ TestMethod();
-
-        static partial void /* trailing trivia */ TestMethod() {  }
-    }
-}";
-            string ExpectedResult = @"using TechTalk.SpecFlow;
-namespace a
-{
-    [Binding]
-    public static partial class MyTestCode
-    {   
-        [Given,When,Then,StepDefinition]
-        public static partial void /* trailing trivia */ TestMethod();
-
-        public static partial void /* trailing trivia */ TestMethod() {  }
-    }
-}";
-            await new CSharpCodeFixTestWithSpecFlowAssemblies<StepDefinitionMustBePublicAnalyzer, StepDefinitionMustBePublicCodeFixProvider>()
-                .WithCode(CodeTemplate)
-                .WithExpectedDiagnostic(ExpectedDiagnostic(8, 51, 8, 61))
-                .WithExpectedDiagnostic(ExpectedDiagnostic(10, 51, 10, 61))
-                .WithFixCode(ExpectedResult)
-                .RunAsync()
-            ;
-        }
-
-        [TestMethod]
-        public async Task Trivia10()
-        {
-            string CodeTemplate = @"using TechTalk.SpecFlow;
-namespace a
-{
-    [Binding]
-    public static partial class MyTestCode
-    {   
-        [Given,When,Then,StepDefinition]
-/*
-leading trivia
-*/
-        static partial void /* trailing trivia */ TestMethod();
-
-        static partial void /* trailing trivia */ TestMethod() {  }
-    }
-}";
-            string ExpectedResult = @"using TechTalk.SpecFlow;
-namespace a
-{
-    [Binding]
-    public static partial class MyTestCode
-    {   
-        [Given,When,Then,StepDefinition]
-/*
-leading trivia
-*/
-        public static partial void /* trailing trivia */ TestMethod();
-
-        public static partial void /* trailing trivia */ TestMethod() {  }
-    }
-}";
-            await new CSharpCodeFixTestWithSpecFlowAssemblies<StepDefinitionMustBePublicAnalyzer, StepDefinitionMustBePublicCodeFixProvider>()
-                .WithCode(CodeTemplate)
-                .WithExpectedDiagnostic(ExpectedDiagnostic(11, 51, 11, 61))
-                .WithExpectedDiagnostic(ExpectedDiagnostic(13, 51, 13, 61))
                 .WithFixCode(ExpectedResult)
                 .RunAsync()
             ;
