@@ -34,32 +34,3 @@ To check your reg-exes for invalid words:
   </items>
 </banlist>
 ```
-# BindingAnalyzer
-
-Finds step definitions and Given/When/Then attributes that are never used by any of the .feature files. Usage:
-
-```ps1
-$ .\BindingAnalyzer.exe C:\Repos\TestAutomation\VisualStudioSolution.sln
-```
-Example output
-```json
-{
-  "UnusedBindingMethods": [
-    "MyNamespace.BindingClass.Method1(string)",
-    "MyNamespace.BindingClass.Method2(string, TechTalk.SpecFlow.Table)",
-  ],
- "UnusedAttributes": [
-    {
-      "File": "C:\\Repos\\TestAutomation\\Bindings\\File1.cs",
-      "Line": 58,
-      "Keyword": "Given",
-      "StepText": "I wait for '(.*)'"
-    },
-    {
-      "File": "C:\\Repos\\TestAutomation\\Bindings\\File1.cs",
-      "Line": 59,
-      "Keyword": "When",
-      "StepText": "I Wait for '(.*)'"
-    },
- ]
- ```
